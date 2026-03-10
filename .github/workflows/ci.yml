@@ -1,0 +1,32 @@
+name: STM32 Compilation Check
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install ARM Toolchain
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '12.2.Rel1' # Compiler version
+
+      - name: Install Ninja & CMake
+        run: sudo apt-get install -y ninja-build cmake
+
+      - name: Configure CMake
+        # Use Ninja because it is faster in CI
+        run: cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/gcc-arm-none-eabi.cmake
+
+      - name: Build
+        run: cmake --build build
