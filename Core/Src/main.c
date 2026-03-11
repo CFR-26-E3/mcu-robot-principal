@@ -270,10 +270,27 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
-  /* Infinite loop */
+  /* Configure PA5 (LD2 on Nucleo-L476RG) as GPIO output and blink it */
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  /* Ensure GPIOA clock is enabled (MX_GPIO_Init typically does this, but safe to call again) */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /* Configure PA5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* Make sure LED starts OFF */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+
+  /* Infinite loop: toggle LED every 500 ms */
   for(;;)
   {
-    osDelay(1);
+    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+    osDelay(500);
   }
   /* USER CODE END 5 */
 }
