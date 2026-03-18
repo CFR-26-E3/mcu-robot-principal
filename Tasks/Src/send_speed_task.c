@@ -1,18 +1,15 @@
 #include "send_speed_task.h"
 
-static PIController left_controller;
-static PIController right_controller;
-
 static float compute_wheel_speed(uint32_t prev_ticks, uint32_t ticks) {
     int32_t diff_left = (int32_t)prev_ticks - (int32_t)ticks;
 
-    if (diff_left > (TICKS_PER_REVOLUTION / 2))
-        diff_left -= TICKS_PER_REVOLUTION;
-    else if (diff_left < -(TICKS_PER_REVOLUTION / 2))
-        diff_left += TICKS_PER_REVOLUTION;
+    if (diff_left > (TICKS_PER_REV_WHEELS / 2))
+        diff_left -= TICKS_PER_REV_WHEELS;
+    else if (diff_left < -(TICKS_PER_REV_WHEELS / 2))
+        diff_left += TICKS_PER_REV_WHEELS;
 
     return (float)(diff_left) / ((float)ODOMETRY_PERIOD * 0.001f) /
-           (float)TICKS_PER_REVOLUTION * 60.0f;
+           (float)TICKS_PER_REV_WHEELS * 60.0f;
 }
 
 void StartSendSpeedTask(void *argument) {

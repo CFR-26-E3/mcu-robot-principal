@@ -80,7 +80,6 @@ const osThreadAttr_t odometry_attributes = {
 
 static StraightRunTaskParam straight_run_task_param;
 static SendSpeedTaskParam send_speed_task_param;
-static OdometryTaskParam odometry_task_param;
 
 /* USER CODE END PV */
 
@@ -194,9 +193,10 @@ int main(void) {
     /* add queues, ... */
     /* USER CODE END RTOS_QUEUES */
 
-  /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+    /* Create the thread(s) */
+    /* creation of defaultTask */
+    defaultTaskHandle =
+        osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
     /* Create the thread(s) */
     /* creation of defaultTask */
     defaultTaskHandle =

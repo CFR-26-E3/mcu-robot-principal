@@ -6,7 +6,6 @@
 
 #include "cmsis_os2.h"
 #include "encoder.h"
-#include "pid_controller.h"
 #include "robot_config.h"
 
 typedef struct {
