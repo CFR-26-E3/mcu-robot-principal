@@ -69,13 +69,6 @@ const osThreadAttr_t sendSpeed_attributes = {
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for odometry */
-osThreadId_t odometryHandle;
-const osThreadAttr_t odometry_attributes = {
-  .name = "odometry",
-  .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityRealtime,
-};
 /* USER CODE BEGIN PV */
 
 static StraightRunTaskParam straight_run_task_param;
@@ -94,7 +87,6 @@ static void MX_TIM1_Init(void);
 void StartDefaultTask(void *argument);
 extern void StartStraightRunTask(void *argument);
 extern void StartSendSpeedTask(void *argument);
-extern void StartOdometryTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -205,9 +197,6 @@ int main(void)
 
   /* creation of sendSpeed */
   sendSpeedHandle = osThreadNew(StartSendSpeedTask, (void*) &send_speed_task_param, &sendSpeed_attributes);
-
-  /* creation of odometry */
-  odometryHandle = osThreadNew(StartOdometryTask, (void*) &odometry_task_param, &odometry_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
