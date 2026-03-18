@@ -8,6 +8,8 @@
 #define WHEEL_RADIUS 0.05f  // Rayon des roues en mètres
 #define WHEEL_BASE 0.3f     // Distance entre les roues en mètres
 
+#define TICKS_PER_REV_WHEELS 2800  // Ticks par tour des encodeurs des roues
+
 /*-----------------------------------------
  * Paramètres de contrôle
  *-----------------------------------------*/
@@ -18,9 +20,12 @@
 
 // PID moteurs droit et gauche
 
-
 // PID moteur levage pince
 
+/*-----------------------------------------
+ * Tâches
+ *-----------------------------------------*/
 
+#define ODOMETRY_PERIOD 10  // Période d'échantillonnage de l'odométrie en ms
 
 #endif  // MCU_ROBOT_PRINCIPAL_ROBOT_CONFIG_H
