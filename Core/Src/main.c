@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "servo.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -73,6 +73,10 @@ const osThreadAttr_t sendSpeed_attributes = {
 
 static StraightRunTaskParam straight_run_task_param;
 static SendSpeedTaskParam send_speed_task_param;
+
+// Déclaration des configurations des servos
+ServoConfig servoPince;      // MG996R sur PA8 (TIM1_CH1)
+ServoConfig servoRetour;     // GS-9025MG sur PA10 (TIM1_CH3)
 
 /* USER CODE END PV */
 
@@ -166,6 +170,49 @@ int main(void)
     init_encoder(&send_speed_task_param.right_encoder,
                  &right_wheel_encoder_cfg);
     send_speed_task_param.huart = &huart2;
+
+
+    /* USER CODE BEGIN 2 */
+
+    // --- 1. Configuration du Servo de Serrage (MG996R - PA8) ---
+    servoPince.htim = &htim1;
+    servoPince.channel = TIM_CHANNEL_1;
+    servoPince.min_pulse_ms = 0.5f; // Position ouverte (0.5ms)
+    servoPince.max_pulse_ms = 2.0f; // Position serrée (2.5ms)
+    SERVO_Init(&servoPince);
+
+    // --- 2. Configuration du Servo de Retournement (GS-9025MG - PA10) ---
+    servoRetour.htim = &htim1;
+    servoRetour.channel = TIM_CHANNEL_3; // PA10 correspond au CH3 du TIM1
+    servoRetour.min_pulse_ms = 0.56f;
+    servoRetour.max_pulse_ms = 2.08f;
+    SERVO_Init(&servoRetour);
+
+    // --- 3. SÉQUENCE DE TEST PHYSIQUE ---
+
+    // Étape A : Mise en position initiale (Pince ouverte, Pas de retournement)
+    SERVO_SetAngle(&servoPince, 90.0f);
+    SERVO_SetAngle(&servoRetour, 0.0f);
+    HAL_Delay(2000); // Attente de stabilisation
+
+    // Étape B : Serrage de la pièce
+    // (On suppose ici que 90° est l'angle de contact avec la pièce)
+    SERVO_SetAngle(&servoPince, 45.0f);
+    HAL_Delay(1000);
+
+    // Étape C : Retournement de la pièce (Rotation à 180°)
+    SERVO_SetAngle(&servoRetour, 180.0f);
+    HAL_Delay(1500); // Délai plus long car la pièce ajoute de l'inertie
+
+    // Étape D : Retour à la position de départ
+    SERVO_SetAngle(&servoRetour, 0.0f);
+    HAL_Delay(1000);
+
+    // Étape E : Libération de la pièce
+    SERVO_SetAngle(&servoPince, 90.0f);
+    HAL_Delay(1000);
+
+    // --- Fin du test, le code continue vers le lancement de FreeRTOS ---
 
   /* USER CODE END 2 */
 
@@ -290,7 +337,7 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 1-1;
+  htim1.Init.Prescaler = 32-1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 50000-1;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -308,7 +355,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
+  sConfigOC.Pulse = 2500;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -318,6 +365,7 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
+  sConfigOC.Pulse = 0;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
