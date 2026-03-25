@@ -6,9 +6,9 @@
  *-----------------------------------------*/
 
 #define WHEEL_RADIUS 0.05f  // Rayon des roues en mètres
-#define WHEEL_BASE 0.3f     // Distance entre les roues en mètres
+#define WHEELS_BASE 0.308f  // Distance entre les roues en mètres
 
-#define TICKS_PER_REV_WHEELS 2800  // Ticks par tour des encodeurs des roues
+#define TICKS_PER_REV_WHEELS 2800  // Ticks par tour des encodeurs
 
 /*-----------------------------------------
  * Paramètres de contrôle
@@ -19,6 +19,12 @@
 #define MAX_ANGULAR_VELOCITY 1.0f  // Vitesse angulaire maximale en rad/s
 
 // PID moteurs droit et gauche
+#define KP_WHEELS_MOTOR 3.0f
+#define KI_WHEELS_MOTOR 0.1f
+#define KD_WHEELS_MOTOR 0.0f
+#define ALPHA_WHEELS_MOTOR 0.0f
+#define MAX_PWM_OUTPUT 1.0f
+#define MIN_PWM_OUTPUT (-1.0f)
 
 // PID moteur levage pince
 
@@ -26,6 +32,8 @@
  * Tâches
  *-----------------------------------------*/
 
-#define ODOMETRY_PERIOD 10  // Période d'échantillonnage de l'odométrie en ms
+// Fréquence des tâches
+#define ODOMETRY_TASK_PERIOD 10         // en ms
+#define CMD_ROBOT_POSE_TASK_PERIOD 100  // en ms
 
 #endif  // MCU_ROBOT_PRINCIPAL_ROBOT_CONFIG_H

@@ -32,9 +32,10 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "cmd_robot_pose_task.h"
+#include "cmd_robot_vel_task.h"
 #include "dc_motor.h"
-#include "send_speed_task.h"
-#include "straight_run_task.h"
+#include "odometry_task.h"
 
 /* USER CODE END Includes */
 
@@ -79,16 +80,8 @@ void Error_Handler(void);
 #define DIRA_ROUE_GAUCHE_GPIO_Port GPIOB
 #define DIRB_ROUE_GAUCHE_Pin GPIO_PIN_1
 #define DIRB_ROUE_GAUCHE_GPIO_Port GPIOB
-#define PWM_ROUE_DROITE_Pin GPIO_PIN_7
-#define PWM_ROUE_DROITE_GPIO_Port GPIOC
-#define PWM_LEVAGE1_Pin GPIO_PIN_8
-#define PWM_LEVAGE1_GPIO_Port GPIOC
 #define PWM_ROUE_GAUCHE_Pin GPIO_PIN_9
 #define PWM_ROUE_GAUCHE_GPIO_Port GPIOC
-#define PWM_SERRAGE1_Pin GPIO_PIN_8
-#define PWM_SERRAGE1_GPIO_Port GPIOA
-#define PWM_RETOURNE1_Pin GPIO_PIN_10
-#define PWM_RETOURNE1_GPIO_Port GPIOA
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14

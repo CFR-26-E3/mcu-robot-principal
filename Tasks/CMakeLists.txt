@@ -1,8 +1,8 @@
 # Crée la bibliothèque statique
 add_library(Tasks STATIC
-        Src/odometry.c
-        Src/straight_run_task.c
-        Src/send_speed_task.c
+        Src/odometry_task.c
+        Src/cmd_robot_vel_task.c
+        Src/cmd_robot_pose_task.c
 )
 
 # Rend le dossier Inc/ public pour que le projet puisse avoir accès aux fonctions, structures etc.

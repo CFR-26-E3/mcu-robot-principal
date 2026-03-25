@@ -1,5 +1,6 @@
 # Crée la bibliothèque statique
 add_library(AppLogic STATIC
+        Src/odometry.c
         Src/pid_controller.c
 )
 
