@@ -45,6 +45,7 @@
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim8;
+TIM_HandleTypeDef htim17;
 
 UART_HandleTypeDef huart2;
 
@@ -81,6 +82,8 @@ const osThreadAttr_t cmdRobotPose_attributes = {
 static CmdRobotVelTaskParams cmd_robot_vel_task_params;
 static OdometryTaskParams odometry_task_params;
 
+StepperMotor stepper_motor_rail;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -90,6 +93,7 @@ static void MX_USART2_UART_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM8_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_TIM17_Init(void);
 void StartDefaultTask(void *argument);
 extern void StartOdometryTask(void *argument);
 extern void StartCmdRobotVelTask(void *argument);
@@ -143,6 +147,7 @@ int main(void) {
     MX_TIM4_Init();
     MX_TIM8_Init();
     MX_TIM3_Init();
+    MX_TIM17_Init();
     /* USER CODE BEGIN 2 */
 
     DcMotorConfig left_wheel_motor_cfg = {
@@ -181,6 +186,20 @@ int main(void) {
 
     CmdRobotPoseTaskParams cmd_robot_pose_task_params = {};
 
+    StepperMotorConfig stepper_motor_rail_config = {
+        .htim_step = &htim17,
+        .tim_freq_hz = 50000,
+        .step_port = STEP_PAP_RAIL_GPIO_Port,
+        .step_pin = STEP_PAP_RAIL_Pin,
+        .dir_port = DIR_PAP_RAIL_GPIO_Port,
+        .dir_pin = DIR_PAP_RAIL_Pin,
+        .motor_min_speed = 200,
+        .motor_max_speed = 8000,
+        .motor_accel = 15000,
+    };
+
+    init_stepper_motor(&stepper_motor_rail, &stepper_motor_rail_config);
+
     /* USER CODE END 2 */
 
     /* Init scheduler */
@@ -207,6 +226,10 @@ int main(void) {
     defaultTaskHandle =
         osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
+    /* creation of odometry */
+    odometryHandle = osThreadNew(
+        StartOdometryTask, (void *)&odometry_task_params, &odometry_attributes);
+
     /* creation of cmdRobotVel */
     cmdRobotVelHandle =
         osThreadNew(StartCmdRobotVelTask, (void *)&cmd_robot_vel_task_params,
@@ -216,11 +239,6 @@ int main(void) {
     cmdRobotPoseHandle =
         osThreadNew(StartCmdRobotPoseTask, (void *)&cmd_robot_pose_task_params,
                     &cmdRobotPose_attributes);
-    odometry_task_params.cmd_robot_vel_task_id = cmdRobotVelHandle;
-
-    /* creation of odometry */
-    odometryHandle = osThreadNew(
-        StartOdometryTask, (void *)&odometry_task_params, &odometry_attributes);
 
     /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -461,6 +479,34 @@ static void MX_TIM8_Init(void) {
 }
 
 /**
+ * @brief TIM17 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_TIM17_Init(void) {
+    /* USER CODE BEGIN TIM17_Init 0 */
+
+    /* USER CODE END TIM17_Init 0 */
+
+    /* USER CODE BEGIN TIM17_Init 1 */
+
+    /* USER CODE END TIM17_Init 1 */
+    htim17.Instance = TIM17;
+    htim17.Init.Prescaler = 800 - 1;
+    htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim17.Init.Period = 2 - 1;
+    htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim17.Init.RepetitionCounter = 0;
+    htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim17) != HAL_OK) {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN TIM17_Init 2 */
+
+    /* USER CODE END TIM17_Init 2 */
+}
+
+/**
  * @brief USART2 Initialization Function
  * @param None
  * @retval None
@@ -509,30 +555,51 @@ static void MX_GPIO_Init(void) {
     __HAL_RCC_GPIOB_CLK_ENABLE();
 
     /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(GPIOC, DIR_PAP_RAIL_Pin | DIRB_ROUE_DROITE_Pin,
+                      GPIO_PIN_RESET);
+
+    /*Configure GPIO pin Output Level */
     HAL_GPIO_WritePin(DIRA_ROUE_DROITE_GPIO_Port, DIRA_ROUE_DROITE_Pin,
                       GPIO_PIN_SET);
 
     /*Configure GPIO pin Output Level */
-    HAL_GPIO_WritePin(DIRB_ROUE_DROITE_GPIO_Port, DIRB_ROUE_DROITE_Pin,
-                      GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(
+        GPIOB, DIRA_ROUE_GAUCHE_Pin | DIRB_ROUE_GAUCHE_Pin | STEP_PAP_RAIL_Pin,
+        GPIO_PIN_RESET);
 
-    /*Configure GPIO pin Output Level */
-    HAL_GPIO_WritePin(GPIOB, DIRA_ROUE_GAUCHE_Pin | DIRB_ROUE_GAUCHE_Pin,
-                      GPIO_PIN_RESET);
-
-    /*Configure GPIO pins : DIRA_ROUE_DROITE_Pin DIRB_ROUE_DROITE_Pin */
-    GPIO_InitStruct.Pin = DIRA_ROUE_DROITE_Pin | DIRB_ROUE_DROITE_Pin;
+    /*Configure GPIO pins : DIR_PAP_RAIL_Pin DIRA_ROUE_DROITE_Pin
+     * DIRB_ROUE_DROITE_Pin */
+    GPIO_InitStruct.Pin =
+        DIR_PAP_RAIL_Pin | DIRA_ROUE_DROITE_Pin | DIRB_ROUE_DROITE_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-    /*Configure GPIO pins : DIRA_ROUE_GAUCHE_Pin DIRB_ROUE_GAUCHE_Pin */
-    GPIO_InitStruct.Pin = DIRA_ROUE_GAUCHE_Pin | DIRB_ROUE_GAUCHE_Pin;
+    /*Configure GPIO pins : DIRA_ROUE_GAUCHE_Pin DIRB_ROUE_GAUCHE_Pin
+     * STEP_PAP_RAIL_Pin */
+    GPIO_InitStruct.Pin =
+        DIRA_ROUE_GAUCHE_Pin | DIRB_ROUE_GAUCHE_Pin | STEP_PAP_RAIL_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /*Configure GPIO pin : FDC_RAIL_AR_Pin */
+    GPIO_InitStruct.Pin = FDC_RAIL_AR_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    HAL_GPIO_Init(FDC_RAIL_AR_GPIO_Port, &GPIO_InitStruct);
+
+    /*Configure GPIO pin : FDC_RAIL_AV_Pin */
+    GPIO_InitStruct.Pin = FDC_RAIL_AV_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    HAL_GPIO_Init(FDC_RAIL_AV_GPIO_Port, &GPIO_InitStruct);
+
+    /* EXTI interrupt init*/
+    HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
     /* USER CODE BEGIN MX_GPIO_Init_2 */
 

@@ -10,6 +10,10 @@
 
 #define TICKS_PER_REV_WHEELS 2800  // Ticks par tour des encodeurs
 
+#define GT2_PULLEY_DIAMETER 0.01269
+#define STEPS_PER_METER 10033.3333
+#define METERS_PER_STEP 0.0000996678
+
 /*-----------------------------------------
  * Paramètres de contrôle
  *-----------------------------------------*/

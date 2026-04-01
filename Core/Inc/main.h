@@ -36,6 +36,8 @@ extern "C" {
 #include "cmd_robot_vel_task.h"
 #include "dc_motor.h"
 #include "odometry_task.h"
+#include "robot_config.h"
+#include "stepper_motor.h"
 
 /* USER CODE END Includes */
 
@@ -64,6 +66,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define DIR_PAP_RAIL_Pin GPIO_PIN_0
+#define DIR_PAP_RAIL_GPIO_Port GPIOC
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3
@@ -80,8 +84,16 @@ void Error_Handler(void);
 #define DIRA_ROUE_GAUCHE_GPIO_Port GPIOB
 #define DIRB_ROUE_GAUCHE_Pin GPIO_PIN_1
 #define DIRB_ROUE_GAUCHE_GPIO_Port GPIOB
+#define STEP_PAP_RAIL_Pin GPIO_PIN_14
+#define STEP_PAP_RAIL_GPIO_Port GPIOB
+#define FDC_RAIL_AR_Pin GPIO_PIN_15
+#define FDC_RAIL_AR_GPIO_Port GPIOB
+#define FDC_RAIL_AR_EXTI_IRQn EXTI15_10_IRQn
 #define PWM_ROUE_GAUCHE_Pin GPIO_PIN_9
 #define PWM_ROUE_GAUCHE_GPIO_Port GPIOC
+#define FDC_RAIL_AV_Pin GPIO_PIN_12
+#define FDC_RAIL_AV_GPIO_Port GPIOA
+#define FDC_RAIL_AV_EXTI_IRQn EXTI15_10_IRQn
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
