@@ -21,6 +21,7 @@ typedef struct {
 
 typedef struct {
     TIM_HandleTypeDef *htim_step;
+    uint32_t tim_freq_hz;  // Timer frequency in Hz (after prescaling)
 
     uint8_t step_active;  // Flag to indicate if a step pulse is currently
                           // active (high)
@@ -46,6 +47,10 @@ typedef struct {
     uint32_t dds_speed;  // Current DDS increment value for speed control
     uint32_t
         dds_accumulator;  // Current DDS accumulator value for speed control
+
+    uint8_t
+        is_resetting;  // The motor is currently finding its starting position
+    uint32_t dds_max_resetting_speed;
 } StepperMotor;
 
 /** @brief Initializes a stepper motor with the specified configuration.
@@ -112,5 +117,7 @@ int32_t get_stepper_motor_current_steps(StepperMotor *motor);
  * @return The current position of the motor in steps.
  */
 int reset_steps_stepper_motor(StepperMotor *motor);
+
+int reset_stepper_motor(StepperMotor *motor);
 
 #endif  // MCU_ROBOT_PRINCIPAL_STEPPER_MOTOR_H

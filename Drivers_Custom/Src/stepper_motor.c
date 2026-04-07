@@ -4,6 +4,7 @@
 
 int init_stepper_motor(StepperMotor *motor, const StepperMotorConfig *cfg) {
     motor->htim_step = cfg->htim_step;
+    motor->tim_freq_hz = cfg->tim_freq_hz;
     motor->dir_port = cfg->dir_port;
     motor->dir_pin = cfg->dir_pin;
     motor->step_active = 0;
@@ -31,6 +32,11 @@ int init_stepper_motor(StepperMotor *motor, const StepperMotorConfig *cfg) {
                    ((uint64_t)cfg->tim_freq_hz * cfg->tim_freq_hz));
     motor->dds_accumulator = 0;
     motor->dds_speed = 0;
+
+    motor->dds_max_resetting_speed =
+        (uint32_t)((float)motor->dds_max_speed * 0.1f);
+
+    motor->is_resetting = 0;
 
     if (!(motor->htim_step->Instance->CR1 & TIM_CR1_CEN))
         HAL_TIM_Base_Start_IT(motor->htim_step);
@@ -108,6 +114,10 @@ void stepper_motor_int_handle(StepperMotor *motor) {
         } else {
             motor->dds_speed = motor->dds_min_speed;
         }
+    } else if (motor->is_resetting) {
+        if (motor->dds_speed < motor->dds_max_resetting_speed) {
+            motor->dds_speed += motor->dds_accel_increment;
+        }
     } else if (motor->dds_speed < motor->dds_max_speed) {
         motor->dds_speed += motor->dds_accel_increment;
     }
@@ -122,6 +132,15 @@ int stop_stepper_motor(StepperMotor *motor) {
 
 int reset_steps_stepper_motor(StepperMotor *motor) {
     motor->current_steps = 0;
+    motor->target_steps = motor->current_steps;
+
+    return 0;
+}
+
+int reset_stepper_motor(StepperMotor *motor) {
+    motor->is_resetting = 1;
+    turn_stepper_motor_to_target_steps(motor, -10000000);
+
     return 0;
 }
 
