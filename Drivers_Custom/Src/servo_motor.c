@@ -33,3 +33,10 @@ int set_servo_angle(ServoMotor* servo, float angle) {
 
     return 0;
 }
+
+float get_servo_angle(ServoMotor* servo) {
+    return (float)(__HAL_TIM_GET_COMPARE(servo->htim_pwm,
+                                         servo->channel_number) -
+                   servo->ccr_min) /
+           (float)(servo->ccr_max - servo->ccr_min) * servo->angle_max;
+}

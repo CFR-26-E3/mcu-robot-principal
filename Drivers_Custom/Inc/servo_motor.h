@@ -28,4 +28,6 @@ void init_servo_motor(ServoMotor* servo, ServoMotorConfig* cfg);
 
 int set_servo_angle(ServoMotor* servo, float angle);
 
+float get_servo_angle(ServoMotor* servo);
+
 #endif  // MCU_ROBOT_PRINCIPAL_SERVO_MOTOR_H
