@@ -19,8 +19,20 @@
  *-----------------------------------------*/
 
 // Limites de vitesse
-#define MAX_LINEAR_VELOCITY 1.0f   // Vitesse linéaire maximale en m/s
-#define MAX_ANGULAR_VELOCITY 1.0f  // Vitesse angulaire maximale en rad/s
+#define ROBOT_MIN_SPEED 0.05f
+#define ROBOT_MAX_SPEED 0.8f
+#define CHARACTERISTIC_DISTANCE \
+    1.0f  // Distance charactéristique pour le freinage
+#define TARGET_THRESHOLD 0.01
+#define ROBOT_MAX_ACCELERATION 0.4f
+#define ROBOT_JERK 5.0f
+
+#define ROBOT_MIN_ANGULAR_SPEED 0.1f
+#define ROBOT_MAX_ANGULAR_SPEED 1.0f
+#define CHARACTERISTIC_ANGLE 0.5f
+#define ANGLE_THRESHOLD 0.05f
+#define ROBOT_MAX_ANGULAR_ACCELERATION 2.60f
+#define ROBOT_ANGULAR_JERK 32.47f
 
 // PID moteurs droit et gauche
 #define KP_WHEELS_MOTOR 3.0f

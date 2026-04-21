@@ -179,14 +179,13 @@ void EXTI15_10_IRQHandler(void) {
     if (EXTI->PR1 & FDC_RAIL_AV_Pin) {
         if (HAL_GPIO_ReadPin(FDC_RAIL_AV_GPIO_Port, FDC_RAIL_AV_Pin)) {
             stop_stepper_motor(&stepper_motor_rail);
-            printf("stop\r\n");
+            reset_steps_stepper_motor(&stepper_motor_rail);
         }
     }
 
     if (EXTI->PR1 & FDC_RAIL_AR_Pin) {
         if (HAL_GPIO_ReadPin(FDC_RAIL_AR_GPIO_Port, FDC_RAIL_AR_Pin)) {
             stop_stepper_motor(&stepper_motor_rail);
-            printf("stop\r\n");
         }
     }
 

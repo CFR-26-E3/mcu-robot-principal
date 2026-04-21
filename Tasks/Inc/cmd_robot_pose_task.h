@@ -6,6 +6,7 @@
 #include "robot_types.h"
 
 typedef struct {
+    osThreadId_t cmd_robot_vel_task;
 } CmdRobotPoseTaskParams;
 
 void StartCmdRobotPoseTask(void* argument);

@@ -67,7 +67,7 @@ const osThreadAttr_t odometry_attributes = {
 osThreadId_t cmdRobotVelHandle;
 const osThreadAttr_t cmdRobotVel_attributes = {
     .name = "cmdRobotVel",
-    .stack_size = 1024 * 4,
+    .stack_size = 2048 * 4,
     .priority = (osPriority_t)osPriorityRealtime,
 };
 /* Definitions for cmdRobotPose */
@@ -80,6 +80,7 @@ const osThreadAttr_t cmdRobotPose_attributes = {
 /* USER CODE BEGIN PV */
 
 static CmdRobotVelTaskParams cmd_robot_vel_task_params;
+static CmdRobotPoseTaskParams cmd_robot_pose_task_params;
 static OdometryTaskParams odometry_task_params;
 
 StepperMotor stepper_motor_rail;
@@ -184,8 +185,6 @@ int main(void) {
     init_encoder(&odometry_task_params.right_encoder, &right_wheel_encoder_cfg);
     odometry_task_params.huart = &huart2;
 
-    CmdRobotPoseTaskParams cmd_robot_pose_task_params = {};
-
     StepperMotorConfig stepper_motor_rail_config = {
         .htim_step = &htim17,
         .tim_freq_hz = 50000,
@@ -236,6 +235,7 @@ int main(void) {
                     &cmdRobotVel_attributes);
 
     /* creation of cmdRobotPose */
+    cmd_robot_pose_task_params.cmd_robot_vel_task = cmdRobotVelHandle;
     cmdRobotPoseHandle =
         osThreadNew(StartCmdRobotPoseTask, (void *)&cmd_robot_pose_task_params,
                     &cmdRobotPose_attributes);
