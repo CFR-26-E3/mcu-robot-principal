@@ -54,6 +54,10 @@ void StartCmdRobotPoseTask(void* argument) {
         float v = ComputeRobotSpeedFromDistance(distance);
         float w = ComputeRobotAngularSpeedFromAngle(angle);
 
+        if (distance < 0.1) {
+            w = 0.0f;
+        }
+
         if (distance < TARGET_THRESHOLD) {
             v = 0.0f;
 
