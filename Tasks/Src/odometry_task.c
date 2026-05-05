@@ -92,15 +92,15 @@ float GetLeftWheelSpeed() {
         return left_wheel_speed_safe;
     }
 
-    return (float)left_wheel_speed;
+    return 0.0f;
 }
 
 float GetRightWheelSpeed() {
     if (osMutexAcquire(right_wheel_speed_mutex, 5) == osOK) {
         float right_wheel_speed_safe = right_wheel_speed;
         osMutexRelease(right_wheel_speed_mutex);
-        return right_wheel_speed;
+        return right_wheel_speed_safe;
     }
 
-    return (float)right_wheel_speed;
+    return 0.0f;
 }
