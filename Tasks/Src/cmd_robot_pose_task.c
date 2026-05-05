@@ -75,8 +75,6 @@ void StartCmdRobotPoseTask(void* argument) {
             robot_cmd_vel = (Twist2D){v, w};
             osMutexRelease(robot_cmd_vel_mutex);
         }
-
-        osThreadFlagsSet(params->cmd_robot_vel_task, 1);
     }
 }
 

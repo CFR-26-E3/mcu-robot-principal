@@ -12,7 +12,7 @@
 typedef struct {
     Encoder left_encoder;
     Encoder right_encoder;
-    osThreadId_t cmd_robot_vel_task_id;
+    osThreadId_t *cmd_robot_vel_task_id;
 
     UART_HandleTypeDef *huart;
 } OdometryTaskParams;

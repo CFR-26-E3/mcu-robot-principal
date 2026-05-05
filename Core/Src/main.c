@@ -83,8 +83,6 @@ static CmdRobotVelTaskParams cmd_robot_vel_task_params;
 static CmdRobotPoseTaskParams cmd_robot_pose_task_params;
 static OdometryTaskParams odometry_task_params;
 
-StepperMotor stepper_motor_rail;
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -184,20 +182,7 @@ int main(void) {
     init_encoder(&odometry_task_params.left_encoder, &left_wheel_encoder_cfg);
     init_encoder(&odometry_task_params.right_encoder, &right_wheel_encoder_cfg);
     odometry_task_params.huart = &huart2;
-
-    StepperMotorConfig stepper_motor_rail_config = {
-        .htim_step = &htim17,
-        .tim_freq_hz = 50000,
-        .step_port = STEP_PAP_RAIL_GPIO_Port,
-        .step_pin = STEP_PAP_RAIL_Pin,
-        .dir_port = DIR_PAP_RAIL_GPIO_Port,
-        .dir_pin = DIR_PAP_RAIL_Pin,
-        .motor_min_speed = 200,
-        .motor_max_speed = 8000,
-        .motor_accel = 15000,
-    };
-
-    init_stepper_motor(&stepper_motor_rail, &stepper_motor_rail_config);
+    odometry_task_params.cmd_robot_vel_task_id = &cmdRobotVelHandle;
 
     /* USER CODE END 2 */
 
@@ -235,7 +220,6 @@ int main(void) {
                     &cmdRobotVel_attributes);
 
     /* creation of cmdRobotPose */
-    cmd_robot_pose_task_params.cmd_robot_vel_task = cmdRobotVelHandle;
     cmdRobotPoseHandle =
         osThreadNew(StartCmdRobotPoseTask, (void *)&cmd_robot_pose_task_params,
                     &cmdRobotPose_attributes);
