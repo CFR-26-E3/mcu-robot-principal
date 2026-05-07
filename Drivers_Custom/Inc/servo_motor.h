@@ -1,6 +1,6 @@
 #ifndef MCU_ROBOT_PRINCIPAL_SERVO_MOTOR_H
 #define MCU_ROBOT_PRINCIPAL_SERVO_MOTOR_H
-#include "stm32l4xx_hal.h"
+#include "stm32f7xx_hal.h"
 
 typedef struct {
     TIM_HandleTypeDef* htim_pwm;

@@ -30,9 +30,6 @@ void StartOdometryTask(void *argument) {
     uint16_t prev_left_ticks = 0;
     uint16_t prev_right_ticks = 0;
 
-    char buffer[100];
-    char buffer_pose[100];
-
     uint32_t ticks = osKernelGetTickCount();
     while (1) {
         ticks += ODOMETRY_TASK_PERIOD;
