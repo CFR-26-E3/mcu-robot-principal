@@ -64,7 +64,7 @@ void StartOdometryTask(void *argument) {
             osMutexRelease(robot_pose_mutex);
         }
 
-        osThreadFlagsSet(params->cmd_robot_vel_task_id, 1);
+        osThreadFlagsSet(*params->cmd_robot_vel_task_id, 1);
     };
 }
 
