@@ -2,7 +2,8 @@
 add_library(DriversCustom STATIC
         Src/dc_motor.c
         Src/encoder.c
-        Src/servo.c
+        Src/stepper_motor.c
+        Src/servo_motor.c
 )
 
 # Rend le dossier Inc/ public pour que le projet puisse avoir accès aux fonctions, structures etc.

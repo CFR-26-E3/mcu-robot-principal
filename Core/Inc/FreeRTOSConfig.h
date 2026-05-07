@@ -1,6 +1,6 @@
 /* USER CODE BEGIN Header */
 /*
- * FreeRTOS Kernel V10.3.1
+ * FreeRTOS Kernel V10.2.1
  * Portion Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  * Portion Copyright (C) 2019 StMicroelectronics, Inc.  All Rights Reserved.
  *
@@ -52,10 +52,6 @@
   #include <stdint.h>
   extern uint32_t SystemCoreClock;
 #endif
-#ifndef CMSIS_device_header
-#define CMSIS_device_header "stm32l4xx.h"
-#endif /* CMSIS_device_header */
-
 #define configENABLE_FPU                         1
 #define configENABLE_MPU                         0
 
@@ -67,8 +63,8 @@
 #define configCPU_CLOCK_HZ                       ( SystemCoreClock )
 #define configTICK_RATE_HZ                       ((TickType_t)1000)
 #define configMAX_PRIORITIES                     ( 56 )
-#define configMINIMAL_STACK_SIZE                 ((uint16_t)128)
-#define configTOTAL_HEAP_SIZE                    ((size_t)64000)
+#define configMINIMAL_STACK_SIZE                 ((uint16_t)256)
+#define configTOTAL_HEAP_SIZE                    ((size_t)200000)
 #define configMAX_TASK_NAME_LEN                  ( 16 )
 #define configUSE_TRACE_FACILITY                 1
 #define configUSE_16_BIT_TICKS                   0
@@ -91,15 +87,7 @@
 #define configUSE_TIMERS                         1
 #define configTIMER_TASK_PRIORITY                ( 2 )
 #define configTIMER_QUEUE_LENGTH                 10
-#define configTIMER_TASK_STACK_DEPTH             256
-
-/* CMSIS-RTOS V2 flags */
-#define configUSE_OS2_THREAD_SUSPEND_RESUME  1
-#define configUSE_OS2_THREAD_ENUMERATE       1
-#define configUSE_OS2_EVENTFLAGS_FROM_ISR    1
-#define configUSE_OS2_THREAD_FLAGS           1
-#define configUSE_OS2_TIMER                  1
-#define configUSE_OS2_MUTEX                  1
+#define configTIMER_TASK_STACK_DEPTH             512
 
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
@@ -114,7 +102,6 @@ to exclude the API function. */
 #define INCLUDE_xTimerPendFunctionCall       1
 #define INCLUDE_xQueueGetMutexHolder         1
 #define INCLUDE_uxTaskGetStackHighWaterMark  1
-#define INCLUDE_xTaskGetCurrentTaskHandle    1
 #define INCLUDE_eTaskGetState                1
 
 /*
@@ -159,9 +146,10 @@ standard names. */
 #define vPortSVCHandler    SVC_Handler
 #define xPortPendSVHandler PendSV_Handler
 
-/* IMPORTANT: After 10.3.1 update, Systick_Handler comes from NVIC (if SYS timebase = systick), otherwise from cmsis_os2.c */
+/* IMPORTANT: This define is commented when used with STM32Cube firmware, when the timebase source is SysTick,
+              to prevent overwriting SysTick_Handler defined within STM32Cube HAL */
 
-#define USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION 0
+#define xPortSysTickHandler SysTick_Handler
 
 /* USER CODE BEGIN Defines */
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */

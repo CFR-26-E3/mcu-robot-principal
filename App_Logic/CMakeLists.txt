@@ -1,6 +1,8 @@
 # Crée la bibliothèque statique
 add_library(AppLogic STATIC
+        Src/odometry.c
         Src/pid_controller.c
+        Src/planar-computation.c
 )
 
 # Rend le dossier Inc/ public pour que le projet puisse avoir accès aux fonctions, structures etc.
