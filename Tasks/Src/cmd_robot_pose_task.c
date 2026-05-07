@@ -1,16 +1,7 @@
 #include "cmd_robot_pose_task.h"
 
-#include <stdio.h>
-
-#include "odometry_task.h"
-#include "pid_controller.h"
-#include "planar-computation.h"
-
 static Twist2D robot_cmd_vel;
 osMutexId_t robot_cmd_vel_mutex;
-
-static PIDController distance_pid;
-static PIDController angle_pid;
 
 float ComputeRobotSpeedFromDistance(float distance) {
     return ROBOT_MIN_SPEED +

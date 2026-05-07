@@ -4,6 +4,11 @@
 #include "cmsis_os2.h"
 #include "robot_config.h"
 #include "robot_types.h"
+#include <stdio.h>
+
+#include "odometry_task.h"
+#include "pid_controller.h"
+#include "planar-computation.h"
 
 typedef struct {
 } CmdRobotPoseTaskParams;

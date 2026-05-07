@@ -2,12 +2,13 @@
 #define MCU_ROBOT_PRINCIPAL_ODOMETRY_TASK_H
 
 #include <math.h>
-
 #include "cmsis_os2.h"
 #include "encoder.h"
 #include "odometry.h"
 #include "robot_config.h"
 #include "robot_types.h"
+#include <stdio.h>
+#include "odometry.h"
 
 typedef struct {
     Encoder left_encoder;

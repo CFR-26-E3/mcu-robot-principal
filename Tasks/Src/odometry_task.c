@@ -1,9 +1,5 @@
 #include "odometry_task.h"
 
-#include <stdio.h>
-
-#include "odometry.h"
-
 static Pose2D robot_pose = {0.0f, 0.0f, 0.0f};
 static osMutexId_t robot_pose_mutex;
 
