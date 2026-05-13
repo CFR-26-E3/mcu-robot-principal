@@ -4,6 +4,8 @@
 
 #include "grip_task.h"
 
+#include "strategy_task.h"
+
 typedef struct {
     float angle;
 } CommandeServoGrip;
@@ -30,7 +32,7 @@ void StartGripTask(void* argument) {
         }
         set_servo_angle(&params->GripServo, angle);
         osDelay(500);
-        osThreadFlagsSet(*params->strategy_task, 1);
+        osThreadFlagsSet(*params->strategy_task, STRAT_BIT_GRIP);
     }
 }
 

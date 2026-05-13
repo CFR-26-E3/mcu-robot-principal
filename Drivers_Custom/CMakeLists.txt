@@ -4,6 +4,8 @@ add_library(DriversCustom STATIC
         Src/encoder.c
         Src/stepper_motor.c
         Src/servo_motor.c
+        Inc/Ultrason.h
+        Src/Ultrason.c
 )
 
 # Rend le dossier Inc/ public pour que le projet puisse avoir accès aux fonctions, structures etc.

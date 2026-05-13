@@ -31,6 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "Detection_task.h"
 #include "cmd_robot_pose_task.h"
 #include "cmd_robot_vel_task.h"
 #include "dc_motor.h"
@@ -41,6 +42,8 @@ extern "C" {
 #include "servo_motor.h"
 #include "spread_task.h"
 #include "stepper_motor.h"
+#include "strategy_task.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

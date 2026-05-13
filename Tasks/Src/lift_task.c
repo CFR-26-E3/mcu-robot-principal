@@ -1,6 +1,8 @@
 
 #include "lift_task.h"
 
+#include "strategy_task.h"
+
 PIDController pid_levage;
 
 static int Commande_Haut_Bas = 1;
@@ -72,6 +74,6 @@ void StartLiftTask(void* argument) {
             Commande_Haut_Bas = 1;
             osDelay(500);
         }
-        osThreadFlagsSet(*params->strategy_task, 1);
+        osThreadFlagsSet(*params->strategy_task, STRAT_BIT_LIFT);
     }
 }

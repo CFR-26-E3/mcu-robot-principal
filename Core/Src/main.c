@@ -126,8 +126,9 @@ static OdometryTaskParams odometry_task_params;
 static LiftTaskParams lift_task_params;
 static SpreadTaskParams spread_task_params;
 static GripTaskParams grip_task_params;
-static OdometryTaskParams strategy_task_params;
+static StrategyTaskParams strategy_task_params;
 static OdometryTaskParams flip_task_params;
+static DetectionTaskParams detection_task_params;
 
 /* USER CODE END PV */
 
@@ -214,7 +215,7 @@ int main(void) {
     MX_TIM11_Init();
     MX_TIM13_Init();
     /* USER CODE BEGIN 2 */
-
+    cmd_robot_pose_task_params.strategy_task = &strategyHandle;
     DcMotorConfig left_wheel_motor_cfg = {
         .htim_pwm = &htim1,
         .channel_number = TIM_CHANNEL_1,
@@ -311,6 +312,7 @@ int main(void) {
 
     init_servo_motor(&grip_task_params.GripServo, &gripCfg);
     grip_task_params.strategy_task = &strategyHandle;
+
     //--Spread Task
 
     ServoMotorConfig spreadCfg = {.htim_pwm = &htim8,
@@ -322,6 +324,30 @@ int main(void) {
 
     init_servo_motor(&spread_task_params.SpreadServo, &spreadCfg);
     spread_task_params.strategy_task = &strategyHandle;
+    // Strategie
+    strategy_task_params.cmd_robot_pose_task = &cmdRobotPoseHandle;
+    strategy_task_params.flip_task = &flipHandle;
+    strategy_task_params.grip_task = &gripHandle;
+    strategy_task_params.lift_task = &liftHandle;
+    strategy_task_params.spread_task = &spreadHandle;
+    // Capteur US
+
+    // initialisation des capteurs
+    CapteurUSConfig CapteurAvGaCfg =
+        (&htim2, TRIG_GAUCHE_AV_GPIO_Port, TRIG_GAUCHE_AV_Pin,
+         ECHO_GAUCHE_AV_GPIO_Port, ECHO_GAUCHE_AV_Pin);
+    CapteurUSConfig CapteurAvDrCfg =
+        (&htim2, TRIG_DROITE_AV_GPIO_Port, TRIG_DROITE_AV_Pin,
+         ECHO_DROITE_AV_GPIO_Port, ECHO_DROITE_AV_Pin, "AV_DROITE");
+    CapteurUSConfig CapteurArGaCfg =
+        (&htim2, TRIG_GAUCHE_AR_GPIO_Port, TRIG_GAUCHE_AR_Pin,
+         ECHO_GAUCHE_AR_GPIO_Port, ECHO_GAUCHE_AR_Pin, "AR_GAUCHE");
+    init_ultrasensor(&detection_task_params.CapteurUltrason_AV_GA,
+                     &CapteurAvGaCfg);
+    init_ultrasensor(&detection_task_params.CapteurUltrason_AV_DR,
+                     &CapteurAvDrCfg);
+    init_ultrasensor(&detection_task_params.CapteurUltrason_AR_GA,
+                     &CapteurArGaCfg);
 
     /* USER CODE END 2 */
 

@@ -14,5 +14,7 @@ typedef struct {
     ServoMotor GripServo;
     osThreadId_t *strategy_task;
 } GripTaskParams;
+
+void Set_grip_angle(enum CmdGrip i);
 void StartGripTask(void *argument);
 #endif  // MCU_ROBOT_PRINCIPAL_SERRAGE_TASK_H

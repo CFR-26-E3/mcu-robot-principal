@@ -4,6 +4,8 @@
 
 #include "spread_task.h"
 
+#include "strategy_task.h"
+
 typedef struct {
     float angle;
 } CommandeServoSpread;
@@ -30,7 +32,7 @@ void StartSpreadTask(void* argument) {
         }
         set_servo_angle(&params->SpreadServo, angle);
         osDelay(500);
-        osThreadFlagsSet(*params->strategy_task, 1);
+        osThreadFlagsSet(*params->strategy_task, STRAT_BIT_SPREAD);
     }
 }
 
