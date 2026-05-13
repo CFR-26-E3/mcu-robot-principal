@@ -71,20 +71,24 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define PWM_RETOURNE_4_Pin GPIO_PIN_5
+#define PWM_RETOURNE_4_GPIO_Port GPIOE
 #define TIRETTE_Pin GPIO_PIN_6
 #define TIRETTE_GPIO_Port GPIOE
-#define ECHO_GAUCHE_AR_Pin GPIO_PIN_6
-#define ECHO_GAUCHE_AR_GPIO_Port GPIOF
 #define ECHO_GAUCHE_AV_Pin GPIO_PIN_7
 #define ECHO_GAUCHE_AV_GPIO_Port GPIOF
 #define ECHO_DROITE_AV_Pin GPIO_PIN_8
 #define ECHO_DROITE_AV_GPIO_Port GPIOF
+#define ECHO_AR_Pin GPIO_PIN_9
+#define ECHO_AR_GPIO_Port GPIOF
 #define MCO_Pin GPIO_PIN_0
 #define MCO_GPIO_Port GPIOH
 #define ENCA_ROUE_GAUCHE_Pin GPIO_PIN_0
 #define ENCA_ROUE_GAUCHE_GPIO_Port GPIOA
 #define ENCB_ROUE_GAUCHE_Pin GPIO_PIN_1
 #define ENCB_ROUE_GAUCHE_GPIO_Port GPIOA
+#define PWM_ECARTEMENT_Pin GPIO_PIN_3
+#define PWM_ECARTEMENT_GPIO_Port GPIOA
 #define ENCA_ROUE_DROITE_Pin GPIO_PIN_6
 #define ENCA_ROUE_DROITE_GPIO_Port GPIOA
 #define ENCB_ROUE_DROITE_Pin GPIO_PIN_7
@@ -115,8 +119,6 @@ void Error_Handler(void);
 #define TRIG_GAUCHE_AR_GPIO_Port GPIOG
 #define USB_PowerSwitchOn_Pin GPIO_PIN_6
 #define USB_PowerSwitchOn_GPIO_Port GPIOG
-#define USB_OverCurrent_Pin GPIO_PIN_7
-#define USB_OverCurrent_GPIO_Port GPIOG
 #define PWM_SERRAGE_Pin GPIO_PIN_6
 #define PWM_SERRAGE_GPIO_Port GPIOC
 #define PWM_RETOURNE_1_Pin GPIO_PIN_7
@@ -129,10 +131,6 @@ void Error_Handler(void);
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
-#define PWM_RETOURNE_4_Pin GPIO_PIN_10
-#define PWM_RETOURNE_4_GPIO_Port GPIOC
-#define PWM_ECARTEMENT_Pin GPIO_PIN_11
-#define PWM_ECARTEMENT_GPIO_Port GPIOC
 #define ECHO_DROITE_AVD3_Pin GPIO_PIN_3
 #define ECHO_DROITE_AVD3_GPIO_Port GPIOD
 #define ECHO_DROITE_AVD3_EXTI_IRQn EXTI3_IRQn
