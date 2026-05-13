@@ -2,51 +2,43 @@
 // Created by maxim on 11/05/2026.
 //
 
-
 #include "grip_task.h"
-/*
-extern ServoMotor SerrageServo;
 
-extern TIM_HandleTypeDef htim8;
+#include "strategy_task.h"
 
-static float angle_impose_180 = 100.0f;
-static osMutexId_t angle_impose_180_mutex;
-*/
-void StartGripTask(void *argument) {
+typedef struct {
+    float angle;
+} CommandeServoGrip;
 
-    while (1){}
-    /*
-    ServoMotorConfig serrageCfg = {.htim_pwm = &htim8,
-                                   .channel_number = TIM_CHANNEL_1,
-                                   .pulse_min = 0.0005f,  // 0.5ms en secondes
-                                   .pulse_max = 0.0025f,  // 2.5ms en secondes
-                                   .angle_max = 180.0f,
-                                   .interrupt_mode = 0};
+CommandeServoGrip CommandeGrip[2] = {{ANGLE_SERRAGE_SERRE},
+                                     {ANGLE_SERRAGE_DESSERRE}};
 
-    init_servo_motor(&SerrageServo, &serrageCfg);
+static enum CmdGrip CommandeImpose;
+static osMutexId_t CommandeImpose_mutex;
 
-    set_servo_angle(&SerrageServo, 100.0f);
-    float angle = 90.0f;
+void StartGripTask(void* argument) {
+    GripTaskParams* params = (GripTaskParams*)(argument);
+    CommandeImpose = CommandeGrip[1].angle;
+    set_servo_angle(&params->GripServo, CommandeImpose);
+    float angle;
     while (1) {
         osThreadFlagsWait(1, 0, osWaitForever);
-
-        if (osMutexAcquire(angle_impose_180_mutex, 2) == osOK) {
-            angle = angle_impose_180;
-            osMutexRelease(angle_impose_180_mutex);
-        }
-        set_servo_angle(&SerrageServo, angle);
+        angle = CommandeGrip[1].angle;
+        set_servo_angle(&params->GripServo, angle);
         osDelay(500);
-        // osThreadFlagsSet(*argument->, 1);
+        if (osMutexAcquire(CommandeImpose_mutex, 2) == osOK) {
+            angle = CommandeGrip[CommandeImpose].angle;
+            osMutexRelease(CommandeImpose_mutex);
+        }
+        set_servo_angle(&params->GripServo, angle);
+        osDelay(500);
+        osThreadFlagsSet(*params->strategy_task, STRAT_BIT_GRIP);
     }
-    */
 }
-/*
-float Get_angle_impose_180() {
-    if (osMutexAcquire(angle_impose_180_mutex, 5) == osOK) {
-        float angle_impose_180_safe = angle_impose_180;
-        osMutexRelease(angle_impose_180_mutex);
-        return angle_impose_180_safe;
+
+void Set_grip_angle(enum CmdGrip i) {
+    if (osMutexAcquire(CommandeImpose_mutex, 2) == osOK) {
+        CommandeImpose = i;
+        osMutexRelease(CommandeImpose_mutex);
     }
-    return 0.0f;
 }
-*/

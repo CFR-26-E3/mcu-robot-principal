@@ -37,8 +37,8 @@
 #define ANGLE_ECARTEMENT_SERRE 0.0f
 #define ANGLE_ECARTEMENT_DESSERRE 110.0f
 
-#define ANGLE_SERRAGE_SERRE 0.0f
-#define ANGLE_SERRAGE_DESSERRE 110.0f
+#define ANGLE_SERRAGE_SERRE 60.0f
+#define ANGLE_SERRAGE_DESSERRE 100.0f
 // PID moteurs droit et gauche
 #define KP_WHEELS_MOTOR 3.0f
 #define KI_WHEELS_MOTOR 0.1f
@@ -63,5 +63,10 @@
 // Fréquence des tâches
 #define ODOMETRY_TASK_PERIOD 10         // en ms
 #define CMD_ROBOT_POSE_TASK_PERIOD 100  // en ms
+
+// Distance stop
+#define DISTANCE_SECURITE_DEFAUT 250
+#define DETECTION_TASK_PERIODE_INTERFERENCE 20
+#define DETECTION_TASK_PERIODE 10  // en ms
 
 #endif  // MCU_ROBOT_PRINCIPAL_ROBOT_CONFIG_H
