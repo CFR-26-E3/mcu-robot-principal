@@ -34,6 +34,11 @@
 #define ROBOT_MAX_ANGULAR_ACCELERATION 2.60f
 #define ROBOT_ANGULAR_JERK 32.47f
 
+#define ANGLE_ECARTEMENT_SERRE 0.0f
+#define ANGLE_ECARTEMENT_DESSERRE 110.0f
+
+#define ANGLE_SERRAGE_SERRE 0.0f
+#define ANGLE_SERRAGE_DESSERRE 110.0f
 // PID moteurs droit et gauche
 #define KP_WHEELS_MOTOR 3.0f
 #define KI_WHEELS_MOTOR 0.1f
@@ -43,6 +48,13 @@
 #define MIN_PWM_OUTPUT (-1.0f)
 
 // PID moteur levage pince
+
+#define KP_LEVAGE_POS 20.0f
+#define KI_LEVAGE_POS 0.50f
+#define KD_LEVAGE_POS 0.0f
+#define ALPHA_LEVAGE_POS 0.0f
+#define MAX_PWM_LEVAGE 0.6f  // On bride à 60% pour la sécurité
+#define MIN_PWM_LEVAGE (-0.6f)
 
 /*-----------------------------------------
  * Tâches
