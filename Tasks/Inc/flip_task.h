@@ -6,9 +6,17 @@
 #define MCU_ROBOT_PRINCIPAL_RETURN_TASK_H
 #include "cmsis_os.h"
 #include "servo_motor.h"
+#include "strategy_task.h"
+
+#define FLIP_TASK_START_FLAG 1
 
 typedef struct {
+    ServoMotor servo_return_1;
+    ServoMotor servo_return_2;
+    ServoMotor servo_return_3;
+    ServoMotor servo_return_4;
 
+    osThreadId_t *strategy_task;
 } FlipTaskParams;
 
 typedef struct {
@@ -19,6 +27,6 @@ typedef struct {
     int color_brick_4;
 } CommandeColors;
 
-void StartReturnTask(void *argument);
+void StartFlipTask(void *argument);
 
 #endif  // MCU_ROBOT_PRINCIPAL_RETURN_TASK_H

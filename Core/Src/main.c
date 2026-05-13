@@ -47,6 +47,7 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim8;
+TIM_HandleTypeDef htim9;
 TIM_HandleTypeDef htim10;
 TIM_HandleTypeDef htim11;
 TIM_HandleTypeDef htim13;
@@ -126,7 +127,7 @@ static CmdRobotVelTaskParams lift_task_params;
 static CmdRobotPoseTaskParams spread_task_params;
 static OdometryTaskParams grip_task_params;
 static OdometryTaskParams strategy_task_params;
-static OdometryTaskParams flip_task_params;
+static FlipTaskParams flip_task_params;
 
 /* USER CODE END PV */
 
@@ -144,6 +145,7 @@ static void MX_USART2_UART_Init(void);
 static void MX_TIM10_Init(void);
 static void MX_TIM11_Init(void);
 static void MX_TIM13_Init(void);
+static void MX_TIM9_Init(void);
 void StartDefaultTask(void *argument);
 extern void StartOdometryTask(void *argument);
 extern void StartCmdRobotVelTask(void *argument);
@@ -167,6 +169,12 @@ int _write(int file, char *ptr, int len) {
     return (status == HAL_OK) ? len : -1;
 }
 
+/* GESTION INTERRUPTIONS SERVO RETOURNEMENT 4 */
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
+    if (htim->Instance == TIM8) {
+        HAL_GPIO_WritePin(PWM_RETOURNE_4_GPIO_Port, PWM_RETOURNE_4_Pin, GPIO_PIN_RESET);
+    }
+}
 /* USER CODE END 0 */
 
 /**
@@ -211,6 +219,7 @@ int main(void)
   MX_TIM10_Init();
   MX_TIM11_Init();
   MX_TIM13_Init();
+  MX_TIM9_Init();
   /* USER CODE BEGIN 2 */
 
     DcMotorConfig left_wheel_motor_cfg = {
@@ -250,36 +259,42 @@ int main(void)
 
     ServoMotorConfig Return_1_Cfg = {.htim_pwm = &htim8,
                                  .channel_number = TIM_CHANNEL_2,
-                                 .pulse_min = 0.0005f,  // 0.5ms en secondes
-                                 .pulse_max = 0.0025f,  // 2.5ms en secondes
+                                 .pulse_min = 0.0005f,  // 0.5ms
+                                 .pulse_max = 0.0025f,  // 2.5ms
                                  .angle_max = 180.0f,
                                  .interrupt_mode = 0};
 
     ServoMotorConfig Return_2_Cfg = {.htim_pwm = &htim8,
                                      .channel_number = TIM_CHANNEL_3,
-                                     .pulse_min = 0.0005f,  // 0.5ms en secondes
-                                     .pulse_max = 0.0025f,  // 2.5ms en secondes
+                                     .pulse_min = 0.0005f,  // 0.5ms
+                                     .pulse_max = 0.0025f,  // 2.5ms
                                      .angle_max = 180.0f,
                                      .interrupt_mode = 0};
 
     ServoMotorConfig Return_3_Cfg = {.htim_pwm = &htim8,
                                      .channel_number = TIM_CHANNEL_4,
-                                     .pulse_min = 0.0005f,  // 0.5ms en secondes
-                                     .pulse_max = 0.0025f,  // 2.5ms en secondes
+                                     .pulse_min = 0.0005f,  // 0.5ms
+                                     .pulse_max = 0.0025f,  // 2.5ms
                                      .angle_max = 180.0f,
                                      .interrupt_mode = 0};
 
-    ServoMotorConfig Return_4_Cfg = {.htim_pwm = &htim8,
-                                     .channel_number = TIM_CHANNEL_5,
-                                     .pulse_min = 0.0005f,  // 0.5ms en secondes
-                                     .pulse_max = 0.0025f,  // 2.5ms en secondes
+    ServoMotorConfig Return_4_Cfg = {.htim_pwm = &htim9,
+                                     .channel_number = TIM_CHANNEL_1,
+                                     .pulse_min = 0.0005f,  // 0.5ms
+                                     .pulse_max = 0.0025f,  // 2.5ms
                                      .angle_max = 180.0f,
-                                     .interrupt_mode = 1};
+                                     .interrupt_mode = 0};
 
-    init_servo_motor(&ServoReturn1, &Return_1_Cfg);
-    init_servo_motor(&ServoReturn2, &Return_2_Cfg);
-    init_servo_motor(&ServoReturn3, &Return_3_Cfg);
-    init_servo_motor(&ServoReturn4, &Return_4_Cfg);
+    init_servo_motor(&flip_task_params.servo_return_1, &Return_1_Cfg);
+    init_servo_motor(&flip_task_params.servo_return_2, &Return_2_Cfg);
+    init_servo_motor(&flip_task_params.servo_return_3, &Return_3_Cfg);
+    init_servo_motor(&flip_task_params.servo_return_4, &Return_4_Cfg);
+    flip_task_params.strategy_task = &strategyHandle;
+
+    set_servo_angle(&flip_task_params.servo_return_1, 10.0f);
+    set_servo_angle(&flip_task_params.servo_return_2, 10.0f);
+    set_servo_angle(&flip_task_params.servo_return_3, 10.0f);
+    set_servo_angle(&flip_task_params.servo_return_4, 10.0f);
 
   /* USER CODE END 2 */
 
@@ -750,6 +765,62 @@ static void MX_TIM8_Init(void)
 }
 
 /**
+  * @brief TIM9 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM9_Init(void)
+{
+
+  /* USER CODE BEGIN TIM9_Init 0 */
+
+  /* USER CODE END TIM9_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM9_Init 1 */
+
+  /* USER CODE END TIM9_Init 1 */
+  htim9.Instance = TIM9;
+  htim9.Init.Prescaler = 50-1;
+  htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim9.Init.Period = 43200-1;
+  htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim9.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim9) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim9, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim9) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim9, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim9, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM9_Init 2 */
+
+  /* USER CODE END TIM9_Init 2 */
+  HAL_TIM_MspPostInit(&htim9);
+
+}
+
+/**
   * @brief TIM10 Initialization Function
   * @param None
   * @retval None
@@ -1011,11 +1082,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : USB_OverCurrent_Pin */
-  GPIO_InitStruct.Pin = USB_OverCurrent_Pin;
+  /*Configure GPIO pin : PG7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(USB_OverCurrent_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PWM_RETOURNE_4_Pin PWM_ECARTEMENT_Pin */
   GPIO_InitStruct.Pin = PWM_RETOURNE_4_Pin|PWM_ECARTEMENT_Pin;
@@ -1114,6 +1185,10 @@ void MPU_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
+
+    if (htim->Instance == TIM8) {
+        HAL_GPIO_WritePin(PWM_RETOURNE_4_GPIO_Port, PWM_RETOURNE_4_Pin, GPIO_PIN_SET);
+    }
 
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM6)

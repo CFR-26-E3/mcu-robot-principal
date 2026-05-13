@@ -7,5 +7,5 @@
 #include "cmsis_os.h"
 #include "main.h"
 
-void StartAscenseurTask(void *argument);
+void StartLiftTask(void *argument);
 #endif  // MCU_ROBOT_PRINCIPAL_ASCENSEUR_TASK_H

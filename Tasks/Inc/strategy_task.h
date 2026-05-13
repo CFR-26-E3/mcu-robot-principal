@@ -10,10 +10,12 @@ typedef struct {
     float angle;  // Orientation en degrés
 } Position_t;
 
+#define STRATEGY_TASK_RESUME_FLAG (1 << 0)
+
 #define STRAT_BIT_POSITION (1 << 0)      // Déplacement terminé
 #define STRAT_BIT_RETOURNEMENT (1 << 1)  // Mouvement ascenseur terminé
 #define STRAT_BIT_DEPOSE (1 << 2)        // Action de serrage terminée
 #define STRAT_BIT_CURSEUR (1 << 3)       // Action d'écartement terminée
 
-void strategie_run(void);
+void StartStrategyTask(void *);
 #endif  // MCU_ROBOT_PRINCIPAL_STRAT_TASK_H

@@ -1,6 +1,6 @@
 #include "cursor_task.h"
 
-#include "servo.h"
+#include "servo_motor.h"
 void StartCurseurTask(void *argument) {
     int commande;
     ServoConfig curseurServo = {&htim8, TIM_CHANNEL_1, 0.5f, 2.5f};

@@ -2,21 +2,20 @@
 // Created by maxim on 11/05/2026.
 //
 
-#include <math.h>
 
-#include "Strat_task.h"
-#include "depose_task.h"
-#include "main.h"
-#include "robot_config.h"
-#include "servo_motor.h"
-
+#include "grip_task.h"
+/*
 extern ServoMotor SerrageServo;
 
 extern TIM_HandleTypeDef htim8;
 
 static float angle_impose_180 = 100.0f;
 static osMutexId_t angle_impose_180_mutex;
-void StartReposeTask(void *argument) {
+*/
+void StartGripTask(void *argument) {
+
+    while (1){}
+    /*
     ServoMotorConfig serrageCfg = {.htim_pwm = &htim8,
                                    .channel_number = TIM_CHANNEL_1,
                                    .pulse_min = 0.0005f,  // 0.5ms en secondes
@@ -39,8 +38,9 @@ void StartReposeTask(void *argument) {
         osDelay(500);
         // osThreadFlagsSet(*argument->, 1);
     }
+    */
 }
-
+/*
 float Get_angle_impose_180() {
     if (osMutexAcquire(angle_impose_180_mutex, 5) == osOK) {
         float angle_impose_180_safe = angle_impose_180;
@@ -49,3 +49,4 @@ float Get_angle_impose_180() {
     }
     return 0.0f;
 }
+*/

@@ -8,12 +8,7 @@
 
 #include <math.h>
 
-#include "depose_task.h"
-#include "main.h"
-#include "servo_motor.h"
-#include "strategy_task.h"
-
-extern ServoMotor EcartementServo;
+#include "spread_task.h"
 
 extern TIM_HandleTypeDef htim8;
 
@@ -24,7 +19,9 @@ typedef struct {
 CommandeServo commandes[2] = {{ANGLE_ECARTEMENT_SERRE},
                               {ANGLE_ECARTEMENT_DESSERRE}};
 
-void StartReposeTask(void *argument) {
+void StartSpreadTask(void *argument) {
+    SpreadTaskArgument *params = (SpreadTaskArgument *)argument;
+
     ServoMotorConfig ecartementCfg = {
         .htim_pwm = &htim8,
         .channel_number = TIM_CHANNEL_6,
@@ -33,13 +30,13 @@ void StartReposeTask(void *argument) {
         .angle_max = 90.0f,
         .interrupt_mode = 0};
 
-    init_servo_motor(&EcartementServo, &ecartementCfg);
+    init_servo_motor(&params->spread_servo, &ecartementCfg);
 
-    set_servo_angle(&EcartementServo, 0.0f);
+    set_servo_angle(&params->spread_servo, 0.0f);
     float angle = 90.0f;
     while (1) {
         osThreadFlagsWait(1, 0, osWaitForever);
- set_servo_angle(&EcartementServo, angle);
+        set_servo_angle(&params->spread_servo, angle);
         osDelay(500);
         // osThreadFlagsSet(*argument->, 1);
     }

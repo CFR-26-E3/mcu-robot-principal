@@ -1,13 +1,13 @@
 #include <math.h>
 
-#include "Strat_task.h"
+#include "strategy_task.h"
 #include "dc_motor.h"
 #include "encoder.h"
 #include "lift_task.h"
 #include "main.h"
 #include "pid_controller.h"
 #include "robot_config.h"
-
+/*
 extern DcMotor motor_levage;
 extern Encoder encoder_levage;
 extern PIDController pid_levage;
@@ -24,8 +24,11 @@ static int Commande_Haut_Bas = 1;
 #define HAUTEUR_HAUTE 0.035f
 #define DIAMETRE_POULIE 0.0122f
 #define PI_VAL 3.14159265f
+*/
+void StartLiftTask(void *argument) {
+    while (1){}
 
-void StartAscenseurTask(void *argument) {
+    /*
     DcMotorConfig moteur_levage_cfg = {.htim_pwm = &htim1,
                                        .channel_number = TIM_CHANNEL_3,
                                        .dir_port_a = DIRA_LEVAGE_GPIO_Port,
@@ -96,4 +99,5 @@ void StartAscenseurTask(void *argument) {
         }
         // osThreadFlagsSet(*argument->, 1);
     }
+    */
 }

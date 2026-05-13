@@ -38,6 +38,7 @@ extern "C" {
 #include "robot_config.h"
 #include "stepper_motor.h"
 #include "servo_motor.h"
+#include "flip_task.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -109,8 +110,6 @@ void Error_Handler(void);
 #define TRIG_GAUCHE_AR_GPIO_Port GPIOG
 #define USB_PowerSwitchOn_Pin GPIO_PIN_6
 #define USB_PowerSwitchOn_GPIO_Port GPIOG
-#define USB_OverCurrent_Pin GPIO_PIN_7
-#define USB_OverCurrent_GPIO_Port GPIOG
 #define PWM_SERRAGE_Pin GPIO_PIN_6
 #define PWM_SERRAGE_GPIO_Port GPIOC
 #define PWM_RETOURNE_1_Pin GPIO_PIN_7

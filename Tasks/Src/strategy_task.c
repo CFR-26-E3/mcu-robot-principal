@@ -1,7 +1,7 @@
 
 #include "strategy_task.h"
 
-void strategie_run() {
+void StartStrategyTask(void *argument) {
     const Position_t points_arret_caisse[] = {
         {1200.0, 800.0, 90.0},  {1200.0, 1500.0, 90.0}, {1200.0, 2200.0, 90.0},
         {1200.0, 2900.0, 90.0}, {1900.0, 2300.0, 270},  {1900.0, 1500.0, 270},
