@@ -1,47 +1,42 @@
 //
-// Created by maxim on 12/05/2026.
-//
-
-//
 // Created by maxim on 11/05/2026.
 //
 
-#include <math.h>
-
-#include "depose_task.h"
-#include "main.h"
-#include "servo_motor.h"
-#include "strategy_task.h"
-
-extern ServoMotor EcartementServo;
-
-extern TIM_HandleTypeDef htim8;
+#include "spread_task.h"
 
 typedef struct {
     float angle;
-} CommandeServo;
+} CommandeServoSpread;
 
-CommandeServo commandes[2] = {{ANGLE_ECARTEMENT_SERRE},
-                              {ANGLE_ECARTEMENT_DESSERRE}};
+CommandeServoSpread CommandeSpread[2] = {{ANGLE_ECARTEMENT_SERRE},
+                                         {ANGLE_ECARTEMENT_DESSERRE}};
 
-void StartReposeTask(void *argument) {
-    ServoMotorConfig ecartementCfg = {
-        .htim_pwm = &htim8,
-        .channel_number = TIM_CHANNEL_6,
-        .pulse_min = 0.0005f,  // 0.5ms en secondes
-        .pulse_max = 0.0025f,  // 2.5ms en secondes
-        .angle_max = 90.0f,
-        .interrupt_mode = 0};
+static enum CmdSpread CommandeImpose;
+static osMutexId_t CommandeImpose_mutex;
 
-    init_servo_motor(&EcartementServo, &ecartementCfg);
-
-    set_servo_angle(&EcartementServo, 0.0f);
-    float angle = 90.0f;
+void StartSpreadTask(void* argument) {
+    SpreadTaskParams* params = (SpreadTaskParams*)(argument);
+    CommandeImpose = CommandeSpread[1].angle;
+    set_servo_angle(&params->SpreadServo, CommandeImpose);
+    float angle;
     while (1) {
         osThreadFlagsWait(1, 0, osWaitForever);
- set_servo_angle(&EcartementServo, angle);
+        angle = CommandeSpread[1].angle;
+        set_servo_angle(&params->SpreadServo, angle);
         osDelay(500);
-        // osThreadFlagsSet(*argument->, 1);
+        if (osMutexAcquire(CommandeImpose_mutex, 2) == osOK) {
+            angle = CommandeSpread[CommandeImpose].angle;
+            osMutexRelease(CommandeImpose_mutex);
+        }
+        set_servo_angle(&params->SpreadServo, angle);
+        osDelay(500);
+        osThreadFlagsSet(*params->strategy_task, 1);
     }
 }
 
+void Set_spread_angle(enum CmdSpread i) {
+    if (osMutexAcquire(CommandeImpose_mutex, 2) == osOK) {
+        CommandeImpose = i;
+        osMutexRelease(CommandeImpose_mutex);
+    }
+}

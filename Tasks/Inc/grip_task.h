@@ -4,8 +4,15 @@
 
 #ifndef MCU_ROBOT_PRINCIPAL_SERRAGE_TASK_H
 #define MCU_ROBOT_PRINCIPAL_SERRAGE_TASK_H
-#include "cmsis_os.h"
-#include "main.h"
+#include <math.h>
 
-void StartSerrageTask(void *argument);
+#include "cmsis_os.h"
+#include "robot_config.h"
+#include "servo_motor.h"
+enum CmdGrip { SERRE, DESSERRE };
+typedef struct {
+    ServoMotor GripServo;
+    osThreadId_t *strategy_task;
+} GripTaskParams;
+void StartGripTask(void *argument);
 #endif  // MCU_ROBOT_PRINCIPAL_SERRAGE_TASK_H

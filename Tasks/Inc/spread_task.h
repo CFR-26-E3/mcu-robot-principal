@@ -5,8 +5,13 @@
 #ifndef MCU_ROBOT_PRINCIPAL_ECARTEMENT_TASK_H
 #define MCU_ROBOT_PRINCIPAL_ECARTEMENT_TASK_H
 #include "cmsis_os.h"
-#include "main.h"
-enum Commande { SERRE, DESSERRE };
+#include "robot_config.h"
+#include "servo_motor.h"
+enum CmdSpread { SERRE, DESSERRE };
+typedef struct {
+    ServoMotor SpreadServo;
+    osThreadId_t *strategy_task;
+} SpreadTaskParams;
 
 void StartEcartementTask(void *argument);
 #endif  // MCU_ROBOT_PRINCIPAL_ECARTEMENT_TASK_H
