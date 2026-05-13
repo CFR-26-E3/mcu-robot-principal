@@ -8,10 +8,10 @@
 
 #include <math.h>
 
-#include "Strat_task.h"
 #include "depose_task.h"
 #include "main.h"
 #include "servo_motor.h"
+#include "strategy_task.h"
 
 extern ServoMotor EcartementServo;
 

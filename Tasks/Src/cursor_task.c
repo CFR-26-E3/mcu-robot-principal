@@ -21,4 +21,3 @@ void StartCurseurTask(void *argument) {
         // osThreadFlagsSet(Strat_taskHandle, STRAT_BIT_CURSEUR);
     }
 }
-}

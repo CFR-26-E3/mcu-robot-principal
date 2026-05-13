@@ -47,6 +47,9 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim8;
+TIM_HandleTypeDef htim10;
+TIM_HandleTypeDef htim11;
+TIM_HandleTypeDef htim13;
 
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
@@ -79,11 +82,51 @@ const osThreadAttr_t cmdRobotPose_attributes = {
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
+/* Definitions for lift */
+osThreadId_t liftHandle;
+const osThreadAttr_t lift_attributes = {
+  .name = "lift",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for spread */
+osThreadId_t spreadHandle;
+const osThreadAttr_t spread_attributes = {
+  .name = "spread",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for flip */
+osThreadId_t flipHandle;
+const osThreadAttr_t flip_attributes = {
+  .name = "flip",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for grip */
+osThreadId_t gripHandle;
+const osThreadAttr_t grip_attributes = {
+  .name = "grip",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for strategy */
+osThreadId_t strategyHandle;
+const osThreadAttr_t strategy_attributes = {
+  .name = "strategy",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* USER CODE BEGIN PV */
 
 static CmdRobotVelTaskParams cmd_robot_vel_task_params;
 static CmdRobotPoseTaskParams cmd_robot_pose_task_params;
 static OdometryTaskParams odometry_task_params;
+static CmdRobotVelTaskParams lift_task_params;
+static CmdRobotPoseTaskParams spread_task_params;
+static OdometryTaskParams grip_task_params;
+static OdometryTaskParams strategy_task_params;
+static OdometryTaskParams flip_task_params;
 
 /* USER CODE END PV */
 
@@ -98,10 +141,18 @@ static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM8_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_TIM10_Init(void);
+static void MX_TIM11_Init(void);
+static void MX_TIM13_Init(void);
 void StartDefaultTask(void *argument);
 extern void StartOdometryTask(void *argument);
 extern void StartCmdRobotVelTask(void *argument);
 extern void StartCmdRobotPoseTask(void *argument);
+extern void StartLiftTask(void *argument);
+extern void StartSpreadTask(void *argument);
+extern void StartFlipTask(void *argument);
+extern void StartGripTask(void *argument);
+extern void StartStrategyTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -157,6 +208,9 @@ int main(void)
   MX_TIM4_Init();
   MX_TIM8_Init();
   MX_USART2_UART_Init();
+  MX_TIM10_Init();
+  MX_TIM11_Init();
+  MX_TIM13_Init();
   /* USER CODE BEGIN 2 */
 
     DcMotorConfig left_wheel_motor_cfg = {
@@ -194,6 +248,39 @@ int main(void)
     odometry_task_params.huart = &huart3;
     odometry_task_params.cmd_robot_vel_task_id = &cmdRobotVelHandle;
 
+    ServoMotorConfig Return_1_Cfg = {.htim_pwm = &htim8,
+                                 .channel_number = TIM_CHANNEL_2,
+                                 .pulse_min = 0.0005f,  // 0.5ms en secondes
+                                 .pulse_max = 0.0025f,  // 2.5ms en secondes
+                                 .angle_max = 180.0f,
+                                 .interrupt_mode = 0};
+
+    ServoMotorConfig Return_2_Cfg = {.htim_pwm = &htim8,
+                                     .channel_number = TIM_CHANNEL_3,
+                                     .pulse_min = 0.0005f,  // 0.5ms en secondes
+                                     .pulse_max = 0.0025f,  // 2.5ms en secondes
+                                     .angle_max = 180.0f,
+                                     .interrupt_mode = 0};
+
+    ServoMotorConfig Return_3_Cfg = {.htim_pwm = &htim8,
+                                     .channel_number = TIM_CHANNEL_4,
+                                     .pulse_min = 0.0005f,  // 0.5ms en secondes
+                                     .pulse_max = 0.0025f,  // 2.5ms en secondes
+                                     .angle_max = 180.0f,
+                                     .interrupt_mode = 0};
+
+    ServoMotorConfig Return_4_Cfg = {.htim_pwm = &htim8,
+                                     .channel_number = TIM_CHANNEL_5,
+                                     .pulse_min = 0.0005f,  // 0.5ms en secondes
+                                     .pulse_max = 0.0025f,  // 2.5ms en secondes
+                                     .angle_max = 180.0f,
+                                     .interrupt_mode = 1};
+
+    init_servo_motor(&ServoReturn1, &Return_1_Cfg);
+    init_servo_motor(&ServoReturn2, &Return_2_Cfg);
+    init_servo_motor(&ServoReturn3, &Return_3_Cfg);
+    init_servo_motor(&ServoReturn4, &Return_4_Cfg);
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -227,6 +314,21 @@ int main(void)
 
   /* creation of cmdRobotPose */
   cmdRobotPoseHandle = osThreadNew(StartCmdRobotPoseTask, (void*) &cmd_robot_pose_task_params, &cmdRobotPose_attributes);
+
+  /* creation of lift */
+  liftHandle = osThreadNew(StartLiftTask, (void*) &lift_task_params, &lift_attributes);
+
+  /* creation of spread */
+  spreadHandle = osThreadNew(StartSpreadTask, (void*) &spread_task_params, &spread_attributes);
+
+  /* creation of flip */
+  flipHandle = osThreadNew(StartFlipTask, (void*) &flip_task_params, &flip_attributes);
+
+  /* creation of grip */
+  gripHandle = osThreadNew(StartGripTask, (void*) &grip_task_params, &grip_attributes);
+
+  /* creation of strategy */
+  strategyHandle = osThreadNew(StartStrategyTask, (void*) &strategy_task_params, &strategy_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -273,8 +375,10 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -307,6 +411,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSI, RCC_MCODIV_1);
 }
 
 /**
@@ -645,6 +750,141 @@ static void MX_TIM8_Init(void)
 }
 
 /**
+  * @brief TIM10 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM10_Init(void)
+{
+
+  /* USER CODE BEGIN TIM10_Init 0 */
+
+  /* USER CODE END TIM10_Init 0 */
+
+  TIM_IC_InitTypeDef sConfigIC = {0};
+
+  /* USER CODE BEGIN TIM10_Init 1 */
+
+  /* USER CODE END TIM10_Init 1 */
+  htim10.Instance = TIM10;
+  htim10.Init.Prescaler = 0;
+  htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim10.Init.Period = 65535;
+  htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim10.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_IC_Init(&htim10) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim10, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM10_Init 2 */
+
+  /* USER CODE END TIM10_Init 2 */
+
+}
+
+/**
+  * @brief TIM11 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM11_Init(void)
+{
+
+  /* USER CODE BEGIN TIM11_Init 0 */
+
+  /* USER CODE END TIM11_Init 0 */
+
+  TIM_IC_InitTypeDef sConfigIC = {0};
+
+  /* USER CODE BEGIN TIM11_Init 1 */
+
+  /* USER CODE END TIM11_Init 1 */
+  htim11.Instance = TIM11;
+  htim11.Init.Prescaler = 0;
+  htim11.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim11.Init.Period = 65535;
+  htim11.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim11.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim11) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_IC_Init(&htim11) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim11, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM11_Init 2 */
+
+  /* USER CODE END TIM11_Init 2 */
+
+}
+
+/**
+  * @brief TIM13 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM13_Init(void)
+{
+
+  /* USER CODE BEGIN TIM13_Init 0 */
+
+  /* USER CODE END TIM13_Init 0 */
+
+  TIM_IC_InitTypeDef sConfigIC = {0};
+
+  /* USER CODE BEGIN TIM13_Init 1 */
+
+  /* USER CODE END TIM13_Init 1 */
+  htim13.Instance = TIM13;
+  htim13.Init.Prescaler = 0;
+  htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim13.Init.Period = 65535;
+  htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_IC_Init(&htim13) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim13, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM13_Init 2 */
+
+  /* USER CODE END TIM13_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -729,6 +969,7 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
@@ -748,11 +989,11 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(TRIG_DROITE_AV_GPIO_Port, TRIG_DROITE_AV_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : ECHO_GAUCHE_AV_Pin TIRETTE_Pin ECHO_GAUCHE_AR_Pin */
-  GPIO_InitStruct.Pin = ECHO_GAUCHE_AV_Pin|TIRETTE_Pin|ECHO_GAUCHE_AR_Pin;
+  /*Configure GPIO pin : TIRETTE_Pin */
+  GPIO_InitStruct.Pin = TIRETTE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+  HAL_GPIO_Init(TIRETTE_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DIRA_ROUE_GAUCHE_Pin DIRB_ROUE_GAUCHE_Pin TRIG_GAUCHE_AR_Pin USB_PowerSwitchOn_Pin
                            TRIG_GAUCHE_AV_Pin */
@@ -783,11 +1024,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : ECHO_DROITE_AV_Pin */
-  GPIO_InitStruct.Pin = ECHO_DROITE_AV_Pin;
+  /*Configure GPIO pin : ECHO_DROITE_AVD3_Pin */
+  GPIO_InitStruct.Pin = ECHO_DROITE_AVD3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(ECHO_DROITE_AV_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(ECHO_DROITE_AVD3_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : TRIG_DROITE_AV_Pin */
   GPIO_InitStruct.Pin = TRIG_DROITE_AV_Pin;
@@ -803,12 +1044,6 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(INTER_EQUIPE_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI0_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI2_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
-
   HAL_NVIC_SetPriority(EXTI3_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 

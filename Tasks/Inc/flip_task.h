@@ -5,7 +5,11 @@
 #ifndef MCU_ROBOT_PRINCIPAL_RETURN_TASK_H
 #define MCU_ROBOT_PRINCIPAL_RETURN_TASK_H
 #include "cmsis_os.h"
-#include "main.h"
+#include "servo_motor.h"
+
+typedef struct {
+
+} FlipTaskParams;
 
 typedef struct {
     int color_team;

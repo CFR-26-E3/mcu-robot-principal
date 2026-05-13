@@ -37,6 +37,7 @@ extern "C" {
 #include "odometry_task.h"
 #include "robot_config.h"
 #include "stepper_motor.h"
+#include "servo_motor.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -64,11 +65,14 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define ECHO_GAUCHE_AV_Pin GPIO_PIN_2
-#define ECHO_GAUCHE_AV_GPIO_Port GPIOE
-#define ECHO_GAUCHE_AV_EXTI_IRQn EXTI2_IRQn
 #define TIRETTE_Pin GPIO_PIN_6
 #define TIRETTE_GPIO_Port GPIOE
+#define ECHO_GAUCHE_AR_Pin GPIO_PIN_6
+#define ECHO_GAUCHE_AR_GPIO_Port GPIOF
+#define ECHO_GAUCHE_AV_Pin GPIO_PIN_7
+#define ECHO_GAUCHE_AV_GPIO_Port GPIOF
+#define ECHO_DROITE_AV_Pin GPIO_PIN_8
+#define ECHO_DROITE_AV_GPIO_Port GPIOF
 #define MCO_Pin GPIO_PIN_0
 #define MCO_GPIO_Port GPIOH
 #define ENCA_ROUE_GAUCHE_Pin GPIO_PIN_0
@@ -123,9 +127,9 @@ void Error_Handler(void);
 #define PWM_RETOURNE_4_GPIO_Port GPIOC
 #define PWM_ECARTEMENT_Pin GPIO_PIN_11
 #define PWM_ECARTEMENT_GPIO_Port GPIOC
-#define ECHO_DROITE_AV_Pin GPIO_PIN_3
-#define ECHO_DROITE_AV_GPIO_Port GPIOD
-#define ECHO_DROITE_AV_EXTI_IRQn EXTI3_IRQn
+#define ECHO_DROITE_AVD3_Pin GPIO_PIN_3
+#define ECHO_DROITE_AVD3_GPIO_Port GPIOD
+#define ECHO_DROITE_AVD3_EXTI_IRQn EXTI3_IRQn
 #define TRIG_DROITE_AV_Pin GPIO_PIN_4
 #define TRIG_DROITE_AV_GPIO_Port GPIOD
 #define TRIG_GAUCHE_AV_Pin GPIO_PIN_10
@@ -138,9 +142,6 @@ void Error_Handler(void);
 #define DIRA_LEVAGE_GPIO_Port GPIOB
 #define DIRB_LEVAGE_Pin GPIO_PIN_9
 #define DIRB_LEVAGE_GPIO_Port GPIOB
-#define ECHO_GAUCHE_AR_Pin GPIO_PIN_0
-#define ECHO_GAUCHE_AR_GPIO_Port GPIOE
-#define ECHO_GAUCHE_AR_EXTI_IRQn EXTI0_IRQn
 
 /* USER CODE BEGIN Private defines */
 
