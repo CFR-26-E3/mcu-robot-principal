@@ -2,6 +2,7 @@
 #define MCU_ROBOT_PRINCIPAL_ODOMETRY_H
 
 #include "math.h"
+#include "planar-computation.h"
 #include "robot_config.h"
 #include "robot_types.h"
 

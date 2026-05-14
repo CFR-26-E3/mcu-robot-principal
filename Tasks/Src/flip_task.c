@@ -72,6 +72,6 @@ void StartFlipTask(void *argument) {
             }
         }
 
-        osThreadFlagsSet(*params->strategy_task, STRATEGY_TASK_RESUME_FLAG);
+        osThreadFlagsSet(*params->strategy_task, STRAT_BIT_FLIP);
     }
 }

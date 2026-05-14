@@ -1,28 +1,35 @@
 
 #include "strategy_task.h"
 
+#include "main.h"
+
 void StartStrategyTask(void* argument) {
     StrategyTaskParams* params = (StrategyTaskParams*)(argument);
 
     const Pose2D points_arret_caisse[] = {
-        {1200.0, 800.0, 90.0},  {1200.0, 1500.0, 90.0}, {1200.0, 2200.0, 90.0},
-        {1200.0, 2900.0, 90.0}, {1900.0, 2300.0, 270},  {1900.0, 1500.0, 270},
-        {1900.0, 700.0, 270},   {1200.0, 100.0, 0.0},   {0.0, 0.0, 0.0}};
+        {1.2, 0.8, 90.0},  {1.2, 1.5, 90.0}, {1.2, 2.2, 90.0},
+        {1.2, 2.9, 90.0},  {1.9, 2.3, 270.0}, {1.9, 1.5, 270.0},
+        {1.9, 0.7, 270.0}, {1.2, 0.1, 0.0},  {0.0, 0.0, 0.0}};
 
     const Pose2D points_arret_garde_mange[] = {
-        {800.0, 150.0, 0.0},    {1200.0, 1150.0, 90.0}, {1200.0, 1850.0, 90.0},
-        {1200.0, 2900.0, 90.0}, {1900.0, 2300.0, 270},  {1900.0, 1500.0, 270},
-        {1900.0, 700.0, 270},   {1200.0, 100.0, 0.0},   {0.0, 0.0, 0.0}};
+        {0.8, 0.15, 0.0},  {1.2, 1.15, 90.0}, {1.2, 1.85, 90.0},
+        {1.2, 2.9, 90.0},  {1.9, 2.3, 270.0}, {1.9, 1.5, 270.0},
+        {1.9, 0.7, 270.0}, {1.2, 0.1, 0.0},   {0.0, 0.0, 0.0}};
 
-    Set_target((Pose2D){600.0, 0.0, 0.0});
+    SetPoseTarget((Pose2D){1.0, 0.0, 0.0});
+    // Destination tout droit devant les caisses
+    osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
+
+    SetPoseTarget((Pose2D){0.0, 0.0, 0.0});
     // Destination tout droit devant les caisses
     osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
     // On attend d'être arrivé
     // !!!! force-t-on l'angle a 90 si on veut faire ligne droite
 
+    /*
     for (int i = 0; i < 7; i++) {
         // Déplacement
-        Set_target(points_arret_caisse[i]);
+        SetPoseTarget(points_arret_caisse[i]);
         // Destination tout droit devant les caisses
         osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
 
@@ -41,7 +48,7 @@ void StartStrategyTask(void* argument) {
         osThreadFlagsWait(STRAT_BIT_LIFT, osFlagsWaitAll, osWaitForever);
 
         // On commence à se déplacer et après on écarte et flip
-        Set_target(points_arret_garde_mange[i]);
+        SetPoseTarget(points_arret_garde_mange[i]);
         // On va vers la zone verte centrale de notre coté
 
         Set_grip_angle(ECARTE);
@@ -70,4 +77,7 @@ void StartStrategyTask(void* argument) {
         osThreadFlagsSet(*params->lift_task, 1);
         osThreadFlagsWait(STRAT_BIT_LIFT, osFlagsWaitAll, osWaitForever);
     }
+    */
+
+    while (1) {}
 }

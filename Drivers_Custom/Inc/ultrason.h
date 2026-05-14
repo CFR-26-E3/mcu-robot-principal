@@ -7,22 +7,31 @@
 #include "stm32f7xx_hal.h"
 
 typedef struct {
-    TIM_HandleTypeDef* htim_pwm;
+    TIM_HandleTypeDef* htim;
+    int channel_number;
     GPIO_TypeDef* port_trigger;
     uint16_t pin_trigger;
     GPIO_TypeDef* port_echo;
     uint16_t pin_echo;
-    uint32_t distance_mm;
 } CapteurUSConfig;
 
 typedef struct {
-    TIM_HandleTypeDef* htim_pwm;
+    TIM_HandleTypeDef* htim;
+    int channel_number;
     GPIO_TypeDef* port_trigger;
     uint16_t pin_trigger;
     GPIO_TypeDef* port_echo;
     uint16_t pin_echo;
-    uint32_t distance_mm;
+
+    uint32_t prev_cnt;
+    uint8_t is_measuring;
+    float distance;
 } CapteurUS;
+
 void init_ultrasensor(CapteurUS* capteur, const CapteurUSConfig* config);
-uint32_t Get_distance(CapteurUS* capteur);
+
+void ultrason_isr(CapteurUS *capteur, TIM_HandleTypeDef *htim);
+
+void start_ultrasensor_measure(CapteurUS *capteur);
+
 #endif  // MCU_ROBOT_PRINCIPAL_ULTRASON_H

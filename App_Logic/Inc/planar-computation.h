@@ -2,8 +2,18 @@
 #define PLANAR_COMPUTATION_LIBRARY_H
 
 #include <math.h>
+#include <stdint.h>
 
-#include "robot_types.h"
+/**
+ * @brief Pose 2D du robot.
+ */
+typedef struct {
+    float x;      // Position x en m
+    float y;      // Position y en m
+    float theta;  // Cap en rad
+} Pose2D;
+
+uint8_t pose2d_are_equals(const Pose2D* a, const Pose2D* b);
 
 /**
  * Computes the Euclidian distance in meters between tow points.

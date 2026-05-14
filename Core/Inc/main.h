@@ -31,10 +31,11 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "Detection_task.h"
 #include "cmd_robot_pose_task.h"
 #include "cmd_robot_vel_task.h"
 #include "dc_motor.h"
+#include "detection_task.h"
+#include "flip_task.h"
 #include "grip_task.h"
 #include "lift_task.h"
 #include "odometry_task.h"
@@ -71,9 +72,7 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define PWM_RETOURNE_4_Pin GPIO_PIN_5
-#define PWM_RETOURNE_4_GPIO_Port GPIOE
-#define TIRETTE_Pin GPIO_PIN_6
+#define TIRETTE_Pin GPIO_PIN_3
 #define TIRETTE_GPIO_Port GPIOE
 #define ECHO_GAUCHE_AV_Pin GPIO_PIN_7
 #define ECHO_GAUCHE_AV_GPIO_Port GPIOF
@@ -87,8 +86,6 @@ void Error_Handler(void);
 #define ENCA_ROUE_GAUCHE_GPIO_Port GPIOA
 #define ENCB_ROUE_GAUCHE_Pin GPIO_PIN_1
 #define ENCB_ROUE_GAUCHE_GPIO_Port GPIOA
-#define PWM_ECARTEMENT_Pin GPIO_PIN_3
-#define PWM_ECARTEMENT_GPIO_Port GPIOA
 #define ENCA_ROUE_DROITE_Pin GPIO_PIN_6
 #define ENCA_ROUE_DROITE_GPIO_Port GPIOA
 #define ENCB_ROUE_DROITE_Pin GPIO_PIN_7
@@ -115,8 +112,8 @@ void Error_Handler(void);
 #define ENCA_LEVAGE_GPIO_Port GPIOD
 #define ENCB_LEVAGE_Pin GPIO_PIN_13
 #define ENCB_LEVAGE_GPIO_Port GPIOD
-#define TRIG_GAUCHE_AR_Pin GPIO_PIN_4
-#define TRIG_GAUCHE_AR_GPIO_Port GPIOG
+#define TRIG_AR_Pin GPIO_PIN_4
+#define TRIG_AR_GPIO_Port GPIOG
 #define USB_PowerSwitchOn_Pin GPIO_PIN_6
 #define USB_PowerSwitchOn_GPIO_Port GPIOG
 #define PWM_SERRAGE_Pin GPIO_PIN_6
@@ -140,8 +137,6 @@ void Error_Handler(void);
 #define TRIG_GAUCHE_AV_GPIO_Port GPIOG
 #define INTER_EQUIPE_Pin GPIO_PIN_12
 #define INTER_EQUIPE_GPIO_Port GPIOG
-#define SWO_Pin GPIO_PIN_3
-#define SWO_GPIO_Port GPIOB
 #define DIRA_LEVAGE_Pin GPIO_PIN_8
 #define DIRA_LEVAGE_GPIO_Port GPIOB
 #define DIRB_LEVAGE_Pin GPIO_PIN_9

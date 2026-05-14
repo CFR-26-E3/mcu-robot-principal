@@ -1,10 +1,14 @@
 #include "cmd_robot_pose_task.h"
 
+#include "main.h"
+
 static Twist2D robot_cmd_vel;
 osMutexId_t robot_cmd_vel_mutex;
 
-static Pose2D robot_cmd_pos;
-osMutexId_t robot_cmd_pos_mutex;
+static Pose2D target;
+osMutexId_t pose_target_mutex;
+
+static Pose2D prev_target;
 
 float ComputeRobotSpeedFromDistance(float distance) {
     return ROBOT_MIN_SPEED +
@@ -28,29 +32,33 @@ void StartCmdRobotPoseTask(void* argument) {
     CmdRobotPoseTaskParams* params = (CmdRobotPoseTaskParams*)(argument);
 
     robot_cmd_vel_mutex = osMutexNew(NULL);
-
-    Pose2D target = {0.0, 0.0, 0.0};
-    int target_index = 0;
+    pose_target_mutex = osMutexNew(NULL);
 
     uint32_t ticks = osKernelGetTickCount();
     while (1) {
         ticks += CMD_ROBOT_POSE_TASK_PERIOD;
         osDelayUntil(ticks);
-        if (osMutexAcquire(robot_cmd_pos_mutex, 2) == osOK) {
-            target = robot_cmd_pos;
-            osMutexRelease(robot_cmd_pos_mutex);
-        }
-        Pose2D robot_pose = GetRobotPose();
 
-        float distance = ComputeL2Distance(robot_pose, target);
-        float angle = ComputeAngleToPath(robot_pose, target);
+        Pose2D robot_pose = GetRobotPose();
+        float distance = 0.0f;
+        float angle = 0.0f;
+
+        if (osMutexAcquire(pose_target_mutex, 10) == osOK) {
+            distance = ComputeL2Distance(robot_pose, target);
+            angle = ComputeAngleToPath(robot_pose, target);
+            osMutexRelease(pose_target_mutex);
+        }
 
         float v = ComputeRobotSpeedFromDistance(distance);
         float w = ComputeRobotAngularSpeedFromAngle(angle);
 
-        int obstacle_av_ga = 0;
-        int obstacle_av_dr = 0;
-        int obstacle_ar_ga = 0;
+        if (!pose2d_are_equals(&prev_target, &target)) {
+            if (fabs(angle) > ANGLE_THRESHOLD) {
+                v = 0.0f;
+            } else {
+                prev_target = target;
+            }
+        }
 
         if (distance < 0.1) {
             w = 0.0f;
@@ -67,17 +75,15 @@ void StartCmdRobotPoseTask(void* argument) {
 
             osThreadFlagsSet(*params->strategy_task, STRAT_BIT_POSITION);
         }
-        obstacle_av_ga = Get_obstacle_av_ga();
-        obstacle_av_dr = Get_obstacle_av_dr();
-        obstacle_ar_ga = Get_obstacle_ar_ga();
-        if (obstacle_av_ga == 1) {
+
+        if (GetDistanceCapteurUSAvDr() < 0.3f || GetDistanceCapteurUSAvGa() < 0.3f) {
             v = 0.0f;
+            w = 0.0f;
         }
-        if (obstacle_ar_ga == 1) {
+
+        if (HAL_GPIO_ReadPin(TIRETTE_GPIO_Port, TIRETTE_Pin) == GPIO_PIN_RESET) {
             v = 0.0f;
-        }
-        if (obstacle_av_dr == 1) {
-            v = 0.0f;
+            w = 0.0f;
         }
 
         if (osMutexAcquire(robot_cmd_vel_mutex, 10) == osOK) {
@@ -97,9 +103,9 @@ Twist2D GetRobotCmdVel() {
     return (Twist2D){0};
 }
 
-void Set_target(Pose2D i) {
-    if (osMutexAcquire(robot_cmd_pos_mutex, 2) == osOK) {
-        robot_cmd_pos = i;
-        osMutexRelease(robot_cmd_pos_mutex);
+void SetPoseTarget(Pose2D i) {
+    if (osMutexAcquire(pose_target_mutex, 10) == osOK) {
+        target = i;
+        osMutexRelease(pose_target_mutex);
     }
 }

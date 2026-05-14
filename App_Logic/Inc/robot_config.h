@@ -20,19 +20,19 @@
 
 // Limites de vitesse
 #define ROBOT_MIN_SPEED 0.05f
-#define ROBOT_MAX_SPEED 0.8f
+#define ROBOT_MAX_SPEED 1.0f
 #define CHARACTERISTIC_DISTANCE \
-    1.0f  // Distance charactéristique pour le freinage
-#define TARGET_THRESHOLD 0.01
-#define ROBOT_MAX_ACCELERATION 0.4f
-#define ROBOT_JERK 5.0f
+    0.7f  // Distance charactéristique pour le freinage
+#define TARGET_THRESHOLD 0.005
+#define ROBOT_MAX_ACCELERATION 1.0f
+#define ROBOT_JERK 7.0f
 
 #define ROBOT_MIN_ANGULAR_SPEED 0.1f
-#define ROBOT_MAX_ANGULAR_SPEED 1.0f
+#define ROBOT_MAX_ANGULAR_SPEED 3.0f
 #define CHARACTERISTIC_ANGLE 0.5f
-#define ANGLE_THRESHOLD 0.05f
-#define ROBOT_MAX_ANGULAR_ACCELERATION 2.60f
-#define ROBOT_ANGULAR_JERK 32.47f
+#define ANGLE_THRESHOLD 0.15f
+#define ROBOT_MAX_ANGULAR_ACCELERATION 3.60f
+#define ROBOT_ANGULAR_JERK 40.47f
 
 #define ANGLE_ECARTEMENT_SERRE 0.0f
 #define ANGLE_ECARTEMENT_DESSERRE 110.0f
@@ -67,6 +67,8 @@
 // Distance stop
 #define DISTANCE_SECURITE_DEFAUT 250
 #define DETECTION_TASK_PERIODE_INTERFERENCE 20
-#define DETECTION_TASK_PERIODE 10  // en ms
+#define DETECTION_TASK_PERIODE 100  // en ms
+#define DETECTION_TIMER_PERIOD 1.0f // micros
+#define SOUND_SPEED 0.00034f // m/micros
 
 #endif  // MCU_ROBOT_PRINCIPAL_ROBOT_CONFIG_H

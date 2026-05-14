@@ -4,8 +4,10 @@ add_library(Tasks STATIC
         Src/cmd_robot_vel_task.c
         Src/cmd_robot_pose_task.c
         Src/strategy_task.c
-        Src/cursor_task.c
-        Inc/Detection_task.h
+        Src/flip_task.c
+        Src/lift_task.c
+        Src/grip_task.c
+        Src/spread_task.c
         Src/Detection_task.c
 )
 

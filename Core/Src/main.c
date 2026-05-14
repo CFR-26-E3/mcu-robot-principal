@@ -43,6 +43,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
@@ -119,6 +120,13 @@ const osThreadAttr_t strategy_attributes = {
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for detection */
+osThreadId_t detectionHandle;
+const osThreadAttr_t detection_attributes = {
+  .name = "detection",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityRealtime,
+};
 /* USER CODE BEGIN PV */
 
 static CmdRobotVelTaskParams cmd_robot_vel_task_params;
@@ -128,7 +136,7 @@ static LiftTaskParams lift_task_params;
 static SpreadTaskParams spread_task_params;
 static GripTaskParams grip_task_params;
 static StrategyTaskParams strategy_task_params;
-static OdometryTaskParams flip_task_params;
+static FlipTaskParams flip_task_params;
 static DetectionTaskParams detection_task_params;
 
 /* USER CODE END PV */
@@ -149,6 +157,7 @@ static void MX_TIM11_Init(void);
 static void MX_TIM13_Init(void);
 static void MX_TIM9_Init(void);
 static void MX_TIM14_Init(void);
+static void MX_TIM2_Init(void);
 void StartDefaultTask(void *argument);
 extern void StartOdometryTask(void *argument);
 extern void StartCmdRobotVelTask(void *argument);
@@ -158,6 +167,7 @@ extern void StartSpreadTask(void *argument);
 extern void StartFlipTask(void *argument);
 extern void StartGripTask(void *argument);
 extern void StartStrategyTask(void *argument);
+extern void StartDetectionTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -168,8 +178,13 @@ extern void StartStrategyTask(void *argument);
 
 int _write(int file, char *ptr, int len) {
     HAL_StatusTypeDef status =
-        HAL_UART_Transmit(&huart2, (uint8_t *)ptr, len, HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart3, (uint8_t *)ptr, len, HAL_MAX_DELAY);
     return (status == HAL_OK) ? len : -1;
+}
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
+    ultrason_isr(&detection_task_params.CapteurUltrason_AV_GA, htim);
+    ultrason_isr(&detection_task_params.CapteurUltrason_AV_DR, htim);
 }
 
 /* USER CODE END 0 */
@@ -218,6 +233,7 @@ int main(void)
   MX_TIM13_Init();
   MX_TIM9_Init();
   MX_TIM14_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
     cmd_robot_pose_task_params.strategy_task = &strategyHandle;
     DcMotorConfig left_wheel_motor_cfg = {
@@ -227,7 +243,7 @@ int main(void)
         .dir_pin_a = DIRA_ROUE_GAUCHE_Pin,
         .dir_port_b = DIRB_ROUE_GAUCHE_GPIO_Port,
         .dir_pin_b = DIRB_ROUE_GAUCHE_Pin,
-        .power_scale = 0.2f};
+        .power_scale = 1.0f};
 
     DcMotorConfig right_wheel_motor_cfg = {
         .htim_pwm = &htim1,
@@ -236,18 +252,18 @@ int main(void)
         .dir_pin_a = DIRA_ROUE_DROITE_Pin,
         .dir_port_b = DIRB_ROUE_DROITE_GPIO_Port,
         .dir_pin_b = DIRB_ROUE_DROITE_Pin,
-        .power_scale = 0.2f};
+        .power_scale = 1.0f};
 
     init_dc_motor(&cmd_robot_vel_task_params.left_motor, &left_wheel_motor_cfg);
     init_dc_motor(&cmd_robot_vel_task_params.right_motor,
                   &right_wheel_motor_cfg);
 
     EncoderConfig left_wheel_encoder_cfg = {
-        .htim = &htim5,
+        .htim = &htim4,
     };
 
     EncoderConfig right_wheel_encoder_cfg = {
-        .htim = &htim3,
+        .htim = &htim2,
     };
 
     init_encoder(&odometry_task_params.left_encoder, &left_wheel_encoder_cfg);
@@ -276,21 +292,21 @@ int main(void)
                                      .angle_max = 180.0f,
                                      .interrupt_mode = 0};
 
-    ServoMotorConfig Return_4_Cfg = {.htim_pwm = &htim8,
-                                     .channel_number = TIM_CHANNEL_5,
+    ServoMotorConfig Return_4_Cfg = {.htim_pwm = &htim9,
+                                     .channel_number = TIM_CHANNEL_1,
                                      .pulse_min = 0.0005f,  // 0.5ms en secondes
                                      .pulse_max = 0.0025f,  // 2.5ms en secondes
                                      .angle_max = 180.0f,
-                                     .interrupt_mode = 1};
+                                     .interrupt_mode = 0};
 
-    init_servo_motor(&ServoReturn1, &Return_1_Cfg);
-    init_servo_motor(&ServoReturn2, &Return_2_Cfg);
-    init_servo_motor(&ServoReturn3, &Return_3_Cfg);
-    init_servo_motor(&ServoReturn4, &Return_4_Cfg);
+    init_servo_motor(&flip_task_params.servo_return_1, &Return_1_Cfg);
+    init_servo_motor(&flip_task_params.servo_return_2, &Return_2_Cfg);
+    init_servo_motor(&flip_task_params.servo_return_3, &Return_3_Cfg);
+    init_servo_motor(&flip_task_params.servo_return_4, &Return_4_Cfg);
 
     //--Lift Task:
     EncoderConfig levage_encoder_cfg = {
-        .htim = &htim4,
+        .htim = &htim3,
     };
 
     DcMotorConfig levage_motor_cfg = {.htim_pwm = &htim1,
@@ -337,21 +353,16 @@ int main(void)
     // Capteur US
 
     // initialisation des capteurs
-    CapteurUSConfig CapteurAvGaCfg =
-        (&htim2, TRIG_GAUCHE_AV_GPIO_Port, TRIG_GAUCHE_AV_Pin,
-         ECHO_GAUCHE_AV_GPIO_Port, ECHO_GAUCHE_AV_Pin);
-    CapteurUSConfig CapteurAvDrCfg =
-        (&htim2, TRIG_DROITE_AV_GPIO_Port, TRIG_DROITE_AV_Pin,
-         ECHO_DROITE_AV_GPIO_Port, ECHO_DROITE_AV_Pin, "AV_DROITE");
-    CapteurUSConfig CapteurArGaCfg =
-        (&htim2, TRIG_GAUCHE_AR_GPIO_Port, TRIG_GAUCHE_AR_Pin,
-         ECHO_GAUCHE_AR_GPIO_Port, ECHO_GAUCHE_AR_Pin, "AR_GAUCHE");
+    CapteurUSConfig CapteurAvGaCfg = {
+        &htim11, TIM_CHANNEL_1,TRIG_GAUCHE_AV_GPIO_Port, TRIG_GAUCHE_AV_Pin, ECHO_GAUCHE_AV_GPIO_Port, ECHO_GAUCHE_AV_Pin
+    };
+    CapteurUSConfig CapteurAvDrCfg = {
+        &htim13, TIM_CHANNEL_1, TRIG_DROITE_AV_GPIO_Port, TRIG_DROITE_AV_Pin, ECHO_DROITE_AV_GPIO_Port, ECHO_DROITE_AV_Pin
+    };
     init_ultrasensor(&detection_task_params.CapteurUltrason_AV_GA,
                      &CapteurAvGaCfg);
     init_ultrasensor(&detection_task_params.CapteurUltrason_AV_DR,
                      &CapteurAvDrCfg);
-    init_ultrasensor(&detection_task_params.CapteurUltrason_AR_GA,
-                     &CapteurArGaCfg);
 
   /* USER CODE END 2 */
 
@@ -401,6 +412,9 @@ int main(void)
 
   /* creation of strategy */
   strategyHandle = osThreadNew(StartStrategyTask, (void*) &strategy_task_params, &strategy_attributes);
+
+  /* creation of detection */
+  detectionHandle = osThreadNew(StartDetectionTask, (void*) &detection_task_params, &detection_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -574,6 +588,55 @@ static void MX_TIM1_Init(void)
 }
 
 /**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_Encoder_InitTypeDef sConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 2800-1;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
+  sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
+  sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
+  sConfig.IC1Filter = 8;
+  sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
+  sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
+  sConfig.IC2Filter = 8;
+  if (HAL_TIM_Encoder_Init(&htim2, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
   * @brief TIM3 Initialization Function
   * @param None
   * @retval None
@@ -605,7 +668,7 @@ static void MX_TIM3_Init(void)
   sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 15;
+  sConfig.IC2Filter = 8;
   if (HAL_TIM_Encoder_Init(&htim3, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -650,11 +713,11 @@ static void MX_TIM4_Init(void)
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC1Filter = 15;
+  sConfig.IC1Filter = 8;
   sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 15;
+  sConfig.IC2Filter = 8;
   if (HAL_TIM_Encoder_Init(&htim4, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -894,9 +957,9 @@ static void MX_TIM11_Init(void)
 
   /* USER CODE END TIM11_Init 1 */
   htim11.Instance = TIM11;
-  htim11.Init.Prescaler = 0;
+  htim11.Init.Prescaler = 108-1;
   htim11.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim11.Init.Period = 65535;
+  htim11.Init.Period = 40000-1;
   htim11.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim11.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim11) != HAL_OK)
@@ -939,9 +1002,9 @@ static void MX_TIM13_Init(void)
 
   /* USER CODE END TIM13_Init 1 */
   htim13.Instance = TIM13;
-  htim13.Init.Prescaler = 0;
+  htim13.Init.Prescaler = 108-1;
   htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim13.Init.Period = 65535;
+  htim13.Init.Period = 40000-1;
   htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
@@ -984,9 +1047,9 @@ static void MX_TIM14_Init(void)
 
   /* USER CODE END TIM14_Init 1 */
   htim14.Instance = TIM14;
-  htim14.Init.Prescaler = 0;
+  htim14.Init.Prescaler = 108-1;
   htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim14.Init.Period = 65535;
+  htim14.Init.Period = 40000-1;
   htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim14.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim14) != HAL_OK)
@@ -997,7 +1060,7 @@ static void MX_TIM14_Init(void)
   {
     Error_Handler();
   }
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
   sConfigIC.ICFilter = 0;
@@ -1120,7 +1183,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOG, DIRA_ROUE_GAUCHE_Pin|DIRB_ROUE_GAUCHE_Pin|TRIG_GAUCHE_AR_Pin|USB_PowerSwitchOn_Pin
+  HAL_GPIO_WritePin(GPIOG, DIRA_ROUE_GAUCHE_Pin|DIRB_ROUE_GAUCHE_Pin|TRIG_AR_Pin|USB_PowerSwitchOn_Pin
                           |TRIG_GAUCHE_AV_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -1131,13 +1194,13 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : TIRETTE_Pin */
   GPIO_InitStruct.Pin = TIRETTE_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(TIRETTE_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : DIRA_ROUE_GAUCHE_Pin DIRB_ROUE_GAUCHE_Pin TRIG_GAUCHE_AR_Pin USB_PowerSwitchOn_Pin
+  /*Configure GPIO pins : DIRA_ROUE_GAUCHE_Pin DIRB_ROUE_GAUCHE_Pin TRIG_AR_Pin USB_PowerSwitchOn_Pin
                            TRIG_GAUCHE_AV_Pin */
-  GPIO_InitStruct.Pin = DIRA_ROUE_GAUCHE_Pin|DIRB_ROUE_GAUCHE_Pin|TRIG_GAUCHE_AR_Pin|USB_PowerSwitchOn_Pin
+  GPIO_InitStruct.Pin = DIRA_ROUE_GAUCHE_Pin|DIRB_ROUE_GAUCHE_Pin|TRIG_AR_Pin|USB_PowerSwitchOn_Pin
                           |TRIG_GAUCHE_AV_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;

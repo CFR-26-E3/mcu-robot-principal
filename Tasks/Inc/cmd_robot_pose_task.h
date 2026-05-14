@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 
-#include "Detection_task.h"
 #include "cmsis_os2.h"
+#include "detection_task.h"
 #include "odometry_task.h"
 #include "pid_controller.h"
 #include "planar-computation.h"
@@ -17,6 +17,6 @@ typedef struct {
 
 void StartCmdRobotPoseTask(void* argument);
 Twist2D GetRobotCmdVel();
-void Set_target(Pose2D i);
+void SetPoseTarget(Pose2D i);
 
 #endif  // MCU_ROBOT_PRINCIPAL_CMD_POSE_TASK_H
