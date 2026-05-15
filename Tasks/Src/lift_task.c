@@ -24,6 +24,7 @@ void StartLiftTask(void* argument) {
     float position_cumulee = 0.0f;
     int32_t last_ticks = get_encoder_ticks(&params->encoder_levage);
     int32_t delta = 0;
+
     while (1) {
         osThreadFlagsWait(1, 0, osWaitForever);
         if (Commande_Haut_Bas == 1) {
