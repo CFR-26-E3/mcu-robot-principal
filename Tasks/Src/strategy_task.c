@@ -7,16 +7,16 @@ void StartStrategyTask(void* argument) {
     StrategyTaskParams* params = (StrategyTaskParams*)(argument);
 
     const Pose2D points_arret_caisse[] = {
-        {1.2, 0.8, 90.0},  {1.2, 1.5, 90.0}, {1.2, 2.2, 90.0},
+        {1.2, 0.8, 90.0},  {1.2, 1.5, 90.0},  {1.2, 2.2, 90.0},
         {1.2, 2.9, 90.0},  {1.9, 2.3, 270.0}, {1.9, 1.5, 270.0},
-        {1.9, 0.7, 270.0}, {1.2, 0.1, 0.0},  {0.0, 0.0, 0.0}};
+        {1.9, 0.7, 270.0}, {1.2, 0.1, 0.0},   {0.0, 0.0, 0.0}};
 
     const Pose2D points_arret_garde_mange[] = {
         {0.8, 0.15, 0.0},  {1.2, 1.15, 90.0}, {1.2, 1.85, 90.0},
         {1.2, 2.9, 90.0},  {1.9, 2.3, 270.0}, {1.9, 1.5, 270.0},
         {1.9, 0.7, 270.0}, {1.2, 0.1, 0.0},   {0.0, 0.0, 0.0}};
 
-    SetPoseTarget((Pose2D){1.0, 0.0, 0.0});
+    SetPoseTarget((Pose2D){45.0, 0.0, 0.0});
     // Destination tout droit devant les caisses
     osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
 
@@ -79,5 +79,6 @@ void StartStrategyTask(void* argument) {
     }
     */
 
-    while (1) {}
+    while (1) {
+    }
 }

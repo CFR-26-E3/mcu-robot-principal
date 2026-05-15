@@ -10,28 +10,33 @@ typedef struct {
     float angle;
 } CommandeServoSpread;
 
-CommandeServoSpread CommandeSpread[2] = {{ANGLE_ECARTEMENT_SERRE},
-                                         {ANGLE_ECARTEMENT_DESSERRE}};
+CommandeServoSpread CommandeSpread[2] = {{ANGLE_ECARTEMENT_DESSERRE},
+                                         {ANGLE_ECARTEMENT_SERRE}};
 
 static enum CmdSpread CommandeImpose;
 static osMutexId_t CommandeImpose_mutex;
 
 void StartSpreadTask(void* argument) {
     SpreadTaskParams* params = (SpreadTaskParams*)(argument);
-    CommandeImpose = CommandeSpread[1].angle;
+
+    CommandeImpose_mutex = osMutexNew(NULL);
+
+    CommandeImpose = CommandeSpread[RAPPROCHE].angle;
     set_servo_angle(&params->SpreadServo, CommandeImpose);
+
     float angle;
+
     while (1) {
         osThreadFlagsWait(1, 0, osWaitForever);
-        angle = CommandeSpread[1].angle;
-        set_servo_angle(&params->SpreadServo, angle);
-        osDelay(500);
+
+        angle = CommandeSpread[RAPPROCHE].angle;
         if (osMutexAcquire(CommandeImpose_mutex, 2) == osOK) {
             angle = CommandeSpread[CommandeImpose].angle;
             osMutexRelease(CommandeImpose_mutex);
         }
+
         set_servo_angle(&params->SpreadServo, angle);
-        osDelay(500);
+
         osThreadFlagsSet(*params->strategy_task, STRAT_BIT_SPREAD);
     }
 }

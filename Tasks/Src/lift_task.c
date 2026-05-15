@@ -7,10 +7,14 @@ PIDController pid_levage;
 
 static int Commande_Haut_Bas = 1;
 
-#define HAUTEUR_BASSE 0.0f
-#define HAUTEUR_HAUTE 0.035f
-#define DIAMETRE_POULIE 0.0122f
-#define PI_VAL 3.14159265f
+
+
+typedef struct {
+    float angle;
+} CommandeServoGrip;
+
+CommandeServoGrip CommandeGrip[2] = {{ANGLE_SERRAGE_SERRE},
+                                     {ANGLE_SERRAGE_DESSERRE}};
 
 void StartLiftTask(void* argument) {
     LiftTaskParams* params = (LiftTaskParams*)(argument);
@@ -24,7 +28,6 @@ void StartLiftTask(void* argument) {
     float position_cumulee = 0.0f;
     int32_t last_ticks = get_encoder_ticks(&params->encoder_levage);
     int32_t delta = 0;
-
     while (1) {
         osThreadFlagsWait(1, 0, osWaitForever);
         if (Commande_Haut_Bas == 1) {

@@ -76,17 +76,20 @@ void StartCmdRobotPoseTask(void* argument) {
             osThreadFlagsSet(*params->strategy_task, STRAT_BIT_POSITION);
         }
 
-        if (GetDistanceCapteurUSAvDr() < 0.3f || GetDistanceCapteurUSAvGa() < 0.3f) {
+        if (GetDistanceCapteurUSAvDr() < 0.3f ||
+            GetDistanceCapteurUSAvGa() < 0.3f) {
             v = 0.0f;
             w = 0.0f;
         }
 
-        if (HAL_GPIO_ReadPin(TIRETTE_GPIO_Port, TIRETTE_Pin) == GPIO_PIN_RESET) {
+        if (HAL_GPIO_ReadPin(TIRETTE_GPIO_Port, TIRETTE_Pin) ==
+            GPIO_PIN_RESET) {
             v = 0.0f;
             w = 0.0f;
         }
 
         if (osMutexAcquire(robot_cmd_vel_mutex, 10) == osOK) {
+            printf("%d, %d\r\n", (int)(v * 1000), (int)(w * 1000));
             robot_cmd_vel = (Twist2D){v, w};
             osMutexRelease(robot_cmd_vel_mutex);
         }

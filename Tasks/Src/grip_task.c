@@ -18,20 +18,23 @@ static osMutexId_t CommandeImpose_mutex;
 
 void StartGripTask(void* argument) {
     GripTaskParams* params = (GripTaskParams*)(argument);
-    CommandeImpose = CommandeGrip[1].angle;
+
+    CommandeImpose_mutex = osMutexNew(NULL);
+
+    CommandeImpose = CommandeGrip[DESSERRE].angle;
     set_servo_angle(&params->GripServo, CommandeImpose);
+
     float angle;
     while (1) {
         osThreadFlagsWait(1, 0, osWaitForever);
-        angle = CommandeGrip[1].angle;
-        set_servo_angle(&params->GripServo, angle);
-        osDelay(500);
+        angle = CommandeGrip[SERRE].angle;
         if (osMutexAcquire(CommandeImpose_mutex, 2) == osOK) {
             angle = CommandeGrip[CommandeImpose].angle;
             osMutexRelease(CommandeImpose_mutex);
         }
+
         set_servo_angle(&params->GripServo, angle);
-        osDelay(500);
+
         osThreadFlagsSet(*params->strategy_task, STRAT_BIT_GRIP);
     }
 }
