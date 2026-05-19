@@ -7,15 +7,6 @@ PIDController pid_levage;
 
 static int Commande_Haut_Bas = 1;
 
-
-
-typedef struct {
-    float angle;
-} CommandeServoGrip;
-
-CommandeServoGrip CommandeGrip[2] = {{ANGLE_SERRAGE_SERRE},
-                                     {ANGLE_SERRAGE_DESSERRE}};
-
 void StartLiftTask(void* argument) {
     LiftTaskParams* params = (LiftTaskParams*)(argument);
 
@@ -32,7 +23,7 @@ void StartLiftTask(void* argument) {
         osThreadFlagsWait(1, 0, osWaitForever);
         if (Commande_Haut_Bas == 1) {
             pid_levage.prev_integral = 0;
-            while (fabs(HAUTEUR_HAUTE - position_cumulee) > 0.001f) {
+            while (fabs(HAUTEUR_HAUTE - position_cumulee) > 0.002f) {
                 int32_t current_ticks =
                     get_encoder_ticks(&params->encoder_levage);
                 delta = current_ticks - last_ticks;
@@ -47,6 +38,9 @@ void StartLiftTask(void* argument) {
 
                 float power = compute_pid_controller(&pid_levage, HAUTEUR_HAUTE,
                                                      position_cumulee, dt);
+                if (fabs(power) < 0.15) {
+                    position_cumulee = HAUTEUR_HAUTE;
+                }
                 set_dc_motor_pwm(&params->motor_levage, -power);
 
                 osDelay(ODOMETRY_TASK_PERIOD);
@@ -56,7 +50,7 @@ void StartLiftTask(void* argument) {
             osDelay(500);
         } else if (Commande_Haut_Bas == 2) {
             pid_levage.prev_integral = 0;
-            while (fabs(HAUTEUR_BASSE - position_cumulee) > 0.001f) {
+            while (fabs(HAUTEUR_BASSE - position_cumulee) > 0.01f) {
                 int32_t current_ticks =
                     get_encoder_ticks(&params->encoder_levage);
                 delta = current_ticks - last_ticks;
@@ -69,6 +63,9 @@ void StartLiftTask(void* argument) {
 
                 float power = compute_pid_controller(&pid_levage, HAUTEUR_BASSE,
                                                      position_cumulee, dt);
+                if (fabs(power) < 0.15) {
+                    position_cumulee = HAUTEUR_BASSE;
+                }
                 set_dc_motor_pwm(&params->motor_levage, -power);
 
                 osDelay(ODOMETRY_TASK_PERIOD);

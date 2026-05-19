@@ -1,5 +1,7 @@
 #include "pid_controller.h"
 
+#include <math.h>
+
 void init_pid_controller(PIDController *controller, float kp, float ki,
                          float kd, float alpha, float output_min,
                          float output_max) {
@@ -36,6 +38,10 @@ float compute_pid_controller(PIDController *controller, float setpoint,
         output = controller->output_max;
     } else if (output < controller->output_min) {
         output = controller->output_min;
+    }
+
+    if (fabs(setpoint) <= 0.001) {
+        output = 0.0f;
     }
     // on enregistre les variables la prochaine iteration
     controller->prev_error = error;

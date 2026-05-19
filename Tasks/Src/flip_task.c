@@ -7,7 +7,7 @@
 static CommandeColors couleur_terrain = {0, 0, 0, 0, 0};
 static osMutexId_t couleur_terrain_mutex;
 
-void StartFlipTask(void *argument) {
+void StartFlipTask(void* argument) {
     FlipTaskParams* params = (FlipTaskParams*)(argument);
 
     set_servo_angle(&params->servo_return_1, 10.0f);
@@ -28,11 +28,12 @@ void StartFlipTask(void *argument) {
     set_servo_angle(&params->servo_return_2, 10.0f);
     set_servo_angle(&params->servo_return_3, 10.0f);
     set_servo_angle(&params->servo_return_4, 10.0f);
+    couleur_terrain_mutex = osMutexNew(NULL);
 
     CommandeColors couleur_recup = {};
 
     while (1) {
-        osThreadFlagsWait(FLIP_TASK_START_FLAG, 0, osWaitForever);
+        osThreadFlagsWait(1, 0, osWaitForever);
 
         if (osMutexAcquire(couleur_terrain_mutex, 2) == osOK) {
             couleur_recup = couleur_terrain;
@@ -73,5 +74,12 @@ void StartFlipTask(void *argument) {
         }
 
         osThreadFlagsSet(*params->strategy_task, STRAT_BIT_FLIP);
+    }
+}
+
+void Set_brick_flip(CommandeColors i) {
+    if (osMutexAcquire(couleur_terrain_mutex, 2) == osOK) {
+        couleur_terrain = i;
+        osMutexRelease(couleur_terrain_mutex);
     }
 }

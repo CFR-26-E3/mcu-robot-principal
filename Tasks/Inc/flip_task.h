@@ -26,7 +26,7 @@ typedef struct {
     int color_brick_3;
     int color_brick_4;
 } CommandeColors;
-
+void Set_brick_flip(CommandeColors i);
 void StartFlipTask(void *argument);
 
 #endif  // MCU_ROBOT_PRINCIPAL_RETURN_TASK_H

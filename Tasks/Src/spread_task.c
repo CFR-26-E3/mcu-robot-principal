@@ -13,16 +13,16 @@ typedef struct {
 CommandeServoSpread CommandeSpread[2] = {{ANGLE_ECARTEMENT_DESSERRE},
                                          {ANGLE_ECARTEMENT_SERRE}};
 
-static enum CmdSpread CommandeImpose;
-static osMutexId_t CommandeImpose_mutex;
+static enum CmdSpread CommandeImposes;
+static osMutexId_t CommandeImposes_mutex;
 
 void StartSpreadTask(void* argument) {
     SpreadTaskParams* params = (SpreadTaskParams*)(argument);
 
-    CommandeImpose_mutex = osMutexNew(NULL);
+    CommandeImposes_mutex = osMutexNew(NULL);
 
-    CommandeImpose = CommandeSpread[RAPPROCHE].angle;
-    set_servo_angle(&params->SpreadServo, CommandeImpose);
+    CommandeImposes = CommandeSpread[RAPPROCHE].angle;
+    set_servo_angle(&params->SpreadServo, CommandeImposes);
 
     float angle;
 
@@ -30,9 +30,9 @@ void StartSpreadTask(void* argument) {
         osThreadFlagsWait(1, 0, osWaitForever);
 
         angle = CommandeSpread[RAPPROCHE].angle;
-        if (osMutexAcquire(CommandeImpose_mutex, 2) == osOK) {
-            angle = CommandeSpread[CommandeImpose].angle;
-            osMutexRelease(CommandeImpose_mutex);
+        if (osMutexAcquire(CommandeImposes_mutex, 2) == osOK) {
+            angle = CommandeSpread[CommandeImposes].angle;
+            osMutexRelease(CommandeImposes_mutex);
         }
 
         set_servo_angle(&params->SpreadServo, angle);
@@ -42,8 +42,8 @@ void StartSpreadTask(void* argument) {
 }
 
 void Set_spread_angle(enum CmdSpread i) {
-    if (osMutexAcquire(CommandeImpose_mutex, 2) == osOK) {
-        CommandeImpose = i;
-        osMutexRelease(CommandeImpose_mutex);
+    if (osMutexAcquire(CommandeImposes_mutex, 2) == osOK) {
+        CommandeImposes = i;
+        osMutexRelease(CommandeImposes_mutex);
     }
 }

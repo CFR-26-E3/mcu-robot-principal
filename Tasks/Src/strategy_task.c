@@ -16,15 +16,81 @@ void StartStrategyTask(void* argument) {
         {1.2, 2.9, 90.0},  {1.9, 2.3, 270.0}, {1.9, 1.5, 270.0},
         {1.9, 0.7, 270.0}, {1.2, 0.1, 0.0},   {0.0, 0.0, 0.0}};
 
-    SetPoseTarget((Pose2D){45.0, 0.0, 0.0});
+    SetPoseTarget((Pose2D){0.45, 0.0, 0.0});
     // Destination tout droit devant les caisses
     osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
+    osDelay(500);
 
-    SetPoseTarget((Pose2D){0.0, 0.0, 0.0});
-    // Destination tout droit devant les caisses
-    osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
-    // On attend d'être arrivé
-    // !!!! force-t-on l'angle a 90 si on veut faire ligne droite
+    // Bleu
+    if (HAL_GPIO_ReadPin(INTER_EQUIPE_GPIO_Port, INTER_EQUIPE_Pin) ==
+        GPIO_PIN_RESET) {
+        SetPoseTarget((Pose2D){1.02, -0.2, 0.0});
+        // Destination tout droit devant les caisses
+        osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
+
+        SetPoseTarget((Pose2D){0.95, -0.3, 0.0});
+        // Destination tout droit devant les caisses
+        osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
+        osDelay(500);
+        Set_grip_angle(DESSERRE);
+        osThreadFlagsSet(*params->grip_task, 1);
+        osThreadFlagsWait(STRAT_BIT_GRIP, osFlagsWaitAll, osWaitForever);
+
+        SetPoseTarget((Pose2D){0.995, -0.95, 0.0});
+        // Destination tout droit devant les caisses
+        osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
+        Set_grip_angle(SERRE);
+        osThreadFlagsSet(*params->grip_task, 1);
+        osThreadFlagsWait(STRAT_BIT_GRIP, osFlagsWaitAll, osWaitForever);
+        SetPoseTarget((Pose2D){0.995, -1.50, 0.0});
+        // Destination tout droit devant les caisses
+        osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
+        SetPoseTarget((Pose2D){0.995, 0.25, 0.0});
+        // Destination tout droit devant les aisses
+
+        osDelay(76000);
+
+        SetPoseTarget((Pose2D){-0.07, 0.0, 0.0});
+        // Destination tout droit devant les caisses
+        osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
+    }
+    // Jaune
+    if (HAL_GPIO_ReadPin(INTER_EQUIPE_GPIO_Port, INTER_EQUIPE_Pin) ==
+        GPIO_PIN_SET) {
+        SetPoseTarget((Pose2D){1.02, 0.2, 0.0});
+        // Destination tout droit devant les caisses
+        osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
+
+        SetPoseTarget((Pose2D){0.95, 0.3, 0.0});
+        // Destination tout droit devant les caisses
+        osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
+        osDelay(500);
+        Set_grip_angle(DESSERRE);
+        osThreadFlagsSet(*params->grip_task, 1);
+        osThreadFlagsWait(STRAT_BIT_GRIP, osFlagsWaitAll, osWaitForever);
+
+        SetPoseTarget((Pose2D){0.995, 0.95, 0.0});
+        // Destination tout droit devant les caisses
+        osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
+        Set_grip_angle(SERRE);
+        osThreadFlagsSet(*params->grip_task, 1);
+        osThreadFlagsWait(STRAT_BIT_GRIP, osFlagsWaitAll, osWaitForever);
+        SetPoseTarget((Pose2D){0.995, 1.50, 0.0});
+        // Destination tout droit devant les caisses
+        osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
+        SetPoseTarget((Pose2D){0.995, -0.25, 0.0});
+        // Destination tout droit devant les aisses
+
+        osDelay(76000);
+
+        SetPoseTarget((Pose2D){-0.07, 0.0, 0.0});
+        // Destination tout droit devant les caisses
+        osThreadFlagsWait(STRAT_BIT_POSITION, osFlagsWaitAll, osWaitForever);
+    }
+    // osThreadFlagsSet(*params->lift_task, 1);
+    // osThreadFlagsWait(STRAT_BIT_LIFT, osFlagsWaitAll, osWaitForever);
+    //  On attend d'être arrivé
+    //  !!!! force-t-on l'angle a 90 si on veut faire ligne droite
 
     /*
     for (int i = 0; i < 7; i++) {

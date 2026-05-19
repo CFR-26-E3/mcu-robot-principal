@@ -52,12 +52,10 @@ void StartCmdRobotPoseTask(void* argument) {
         float v = ComputeRobotSpeedFromDistance(distance);
         float w = ComputeRobotAngularSpeedFromAngle(angle);
 
-        if (!pose2d_are_equals(&prev_target, &target)) {
-            if (fabs(angle) > ANGLE_THRESHOLD) {
-                v = 0.0f;
-            } else {
-                prev_target = target;
-            }
+        if (fabs(angle) > 0.05f) {
+            v = 0.0f;
+        } else {
+            prev_target = target;
         }
 
         if (distance < 0.1) {
@@ -89,7 +87,6 @@ void StartCmdRobotPoseTask(void* argument) {
         }
 
         if (osMutexAcquire(robot_cmd_vel_mutex, 10) == osOK) {
-            printf("%d, %d\r\n", (int)(v * 1000), (int)(w * 1000));
             robot_cmd_vel = (Twist2D){v, w};
             osMutexRelease(robot_cmd_vel_mutex);
         }
