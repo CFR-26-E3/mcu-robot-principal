@@ -24,3 +24,8 @@ float ConditionedAngle(float angle) {
     if (angle < -M_PI) return angle + 2 * M_PI;
     return angle;
 }
+
+uint8_t pose2d_are_equals(const Pose2D* a, const Pose2D* b) {
+    return (a->x != b->x) || (a->y != b->y) || (a->theta != b->theta);
+}
+

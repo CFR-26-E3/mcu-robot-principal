@@ -3,6 +3,12 @@ add_library(Tasks STATIC
         Src/odometry_task.c
         Src/cmd_robot_vel_task.c
         Src/cmd_robot_pose_task.c
+        Src/strategy_task.c
+        Src/flip_task.c
+        Src/lift_task.c
+        Src/grip_task.c
+        Src/spread_task.c
+        Src/Detection_task.c
 )
 
 # Rend le dossier Inc/ public pour que le projet puisse avoir accès aux fonctions, structures etc.

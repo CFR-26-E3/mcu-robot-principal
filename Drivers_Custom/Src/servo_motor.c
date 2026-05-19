@@ -15,10 +15,12 @@ void init_servo_motor(ServoMotor* servo, ServoMotorConfig* cfg) {
 
     set_servo_angle(servo, 0.0f);
 
-    if (cfg->interrupt_mode == 1)
+    if (cfg->interrupt_mode == 1) {
+        HAL_TIM_Base_Start_IT(cfg->htim_pwm);
         HAL_TIM_PWM_Start_IT(cfg->htim_pwm, cfg->channel_number);
-    else
+    } else {
         HAL_TIM_PWM_Start(cfg->htim_pwm, cfg->channel_number);
+    }
 }
 
 int set_servo_angle(ServoMotor* servo, float angle) {

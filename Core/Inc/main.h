@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.h
-  * @brief          : Header for main.c file.
-  *                   This file contains the common defines of the application.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2026 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.h
+ * @brief          : Header for main.c file.
+ *                   This file contains the common defines of the application.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2026 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -34,9 +34,17 @@ extern "C" {
 #include "cmd_robot_pose_task.h"
 #include "cmd_robot_vel_task.h"
 #include "dc_motor.h"
+#include "detection_task.h"
+#include "flip_task.h"
+#include "grip_task.h"
+#include "lift_task.h"
 #include "odometry_task.h"
 #include "robot_config.h"
+#include "servo_motor.h"
+#include "spread_task.h"
 #include "stepper_motor.h"
+#include "strategy_task.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -64,51 +72,54 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define ECHO_GAUCHE_AV_Pin GPIO_PIN_2
-#define ECHO_GAUCHE_AV_GPIO_Port GPIOE
-#define ECHO_GAUCHE_AV_EXTI_IRQn EXTI2_IRQn
-#define TIRETTE_Pin GPIO_PIN_6
+#define TIRETTE_Pin GPIO_PIN_3
 #define TIRETTE_GPIO_Port GPIOE
+#define PWM_RETOURNE_4_Pin GPIO_PIN_5
+#define PWM_RETOURNE_4_GPIO_Port GPIOE
+#define PWM_SERRAGE_Pin GPIO_PIN_6
+#define PWM_SERRAGE_GPIO_Port GPIOE
+#define PWM_LEVAGE_Pin GPIO_PIN_6
+#define PWM_LEVAGE_GPIO_Port GPIOF
+#define ECHO_GAUCHE_AV_Pin GPIO_PIN_7
+#define ECHO_GAUCHE_AV_GPIO_Port GPIOF
+#define ECHO_DROITE_AV_Pin GPIO_PIN_8
+#define ECHO_DROITE_AV_GPIO_Port GPIOF
+#define ECHO_AR_Pin GPIO_PIN_9
+#define ECHO_AR_GPIO_Port GPIOF
 #define MCO_Pin GPIO_PIN_0
 #define MCO_GPIO_Port GPIOH
-#define ENCA_ROUE_GAUCHE_Pin GPIO_PIN_0
-#define ENCA_ROUE_GAUCHE_GPIO_Port GPIOA
-#define ENCB_ROUE_GAUCHE_Pin GPIO_PIN_1
-#define ENCB_ROUE_GAUCHE_GPIO_Port GPIOA
-#define ENCA_ROUE_DROITE_Pin GPIO_PIN_6
+#define ENCA_ROUE_DROITE_Pin GPIO_PIN_5
 #define ENCA_ROUE_DROITE_GPIO_Port GPIOA
-#define ENCB_ROUE_DROITE_Pin GPIO_PIN_7
-#define ENCB_ROUE_DROITE_GPIO_Port GPIOA
 #define DIRA_ROUE_GAUCHE_Pin GPIO_PIN_0
 #define DIRA_ROUE_GAUCHE_GPIO_Port GPIOG
 #define DIRB_ROUE_GAUCHE_Pin GPIO_PIN_1
 #define DIRB_ROUE_GAUCHE_GPIO_Port GPIOG
-#define PWM_ROUE_GAUCHE_Pin GPIO_PIN_9
-#define PWM_ROUE_GAUCHE_GPIO_Port GPIOE
-#define PWM_ROUE_DROITE_Pin GPIO_PIN_11
-#define PWM_ROUE_DROITE_GPIO_Port GPIOE
-#define PWM_LEVAGE_Pin GPIO_PIN_13
-#define PWM_LEVAGE_GPIO_Port GPIOE
-#define DIRA_ROUE_DROITE_Pin GPIO_PIN_14
-#define DIRA_ROUE_DROITE_GPIO_Port GPIOB
-#define DIRB_ROUE_DROITE_Pin GPIO_PIN_15
-#define DIRB_ROUE_DROITE_GPIO_Port GPIOB
+#define ENCA_LEVAGE_Pin GPIO_PIN_9
+#define ENCA_LEVAGE_GPIO_Port GPIOE
+#define ENCB_LEVAGE_Pin GPIO_PIN_11
+#define ENCB_LEVAGE_GPIO_Port GPIOE
+#define PWM_ROUE_GAUHE_Pin GPIO_PIN_14
+#define PWM_ROUE_GAUHE_GPIO_Port GPIOB
+#define PWM_ROUE_DROITE_Pin GPIO_PIN_15
+#define PWM_ROUE_DROITE_GPIO_Port GPIOB
 #define STLK_RX_Pin GPIO_PIN_8
 #define STLK_RX_GPIO_Port GPIOD
 #define STLK_TX_Pin GPIO_PIN_9
 #define STLK_TX_GPIO_Port GPIOD
-#define ENCA_LEVAGE_Pin GPIO_PIN_12
-#define ENCA_LEVAGE_GPIO_Port GPIOD
-#define ENCB_LEVAGE_Pin GPIO_PIN_13
-#define ENCB_LEVAGE_GPIO_Port GPIOD
-#define TRIG_GAUCHE_AR_Pin GPIO_PIN_4
-#define TRIG_GAUCHE_AR_GPIO_Port GPIOG
+#define ENCA_ROUE_GAUCHE_Pin GPIO_PIN_12
+#define ENCA_ROUE_GAUCHE_GPIO_Port GPIOD
+#define ENCB_ROUE_GAUCHE_Pin GPIO_PIN_13
+#define ENCB_ROUE_GAUCHE_GPIO_Port GPIOD
+#define DIRA_ROUE_DROITE_Pin GPIO_PIN_14
+#define DIRA_ROUE_DROITE_GPIO_Port GPIOD
+#define DIRB_ROUE_DROITE_Pin GPIO_PIN_15
+#define DIRB_ROUE_DROITE_GPIO_Port GPIOD
+#define TRIG_AR_Pin GPIO_PIN_4
+#define TRIG_AR_GPIO_Port GPIOG
 #define USB_PowerSwitchOn_Pin GPIO_PIN_6
 #define USB_PowerSwitchOn_GPIO_Port GPIOG
-#define USB_OverCurrent_Pin GPIO_PIN_7
-#define USB_OverCurrent_GPIO_Port GPIOG
-#define PWM_SERRAGE_Pin GPIO_PIN_6
-#define PWM_SERRAGE_GPIO_Port GPIOC
+#define PWM_ECARTEMENT_Pin GPIO_PIN_6
+#define PWM_ECARTEMENT_GPIO_Port GPIOC
 #define PWM_RETOURNE_1_Pin GPIO_PIN_7
 #define PWM_RETOURNE_1_GPIO_Port GPIOC
 #define PWM_RETOURNE_2_Pin GPIO_PIN_8
@@ -119,28 +130,21 @@ void Error_Handler(void);
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
-#define PWM_RETOURNE_4_Pin GPIO_PIN_10
-#define PWM_RETOURNE_4_GPIO_Port GPIOC
-#define PWM_ECARTEMENT_Pin GPIO_PIN_11
-#define PWM_ECARTEMENT_GPIO_Port GPIOC
-#define ECHO_DROITE_AV_Pin GPIO_PIN_3
-#define ECHO_DROITE_AV_GPIO_Port GPIOD
-#define ECHO_DROITE_AV_EXTI_IRQn EXTI3_IRQn
+#define ECHO_DROITE_AVD3_Pin GPIO_PIN_3
+#define ECHO_DROITE_AVD3_GPIO_Port GPIOD
+#define ECHO_DROITE_AVD3_EXTI_IRQn EXTI3_IRQn
 #define TRIG_DROITE_AV_Pin GPIO_PIN_4
 #define TRIG_DROITE_AV_GPIO_Port GPIOD
 #define TRIG_GAUCHE_AV_Pin GPIO_PIN_10
 #define TRIG_GAUCHE_AV_GPIO_Port GPIOG
 #define INTER_EQUIPE_Pin GPIO_PIN_12
 #define INTER_EQUIPE_GPIO_Port GPIOG
-#define SWO_Pin GPIO_PIN_3
-#define SWO_GPIO_Port GPIOB
+#define ENCB_ROUE_DROITE_Pin GPIO_PIN_3
+#define ENCB_ROUE_DROITE_GPIO_Port GPIOB
 #define DIRA_LEVAGE_Pin GPIO_PIN_8
 #define DIRA_LEVAGE_GPIO_Port GPIOB
 #define DIRB_LEVAGE_Pin GPIO_PIN_9
 #define DIRB_LEVAGE_GPIO_Port GPIOB
-#define ECHO_GAUCHE_AR_Pin GPIO_PIN_0
-#define ECHO_GAUCHE_AR_GPIO_Port GPIOE
-#define ECHO_GAUCHE_AR_EXTI_IRQn EXTI0_IRQn
 
 /* USER CODE BEGIN Private defines */
 

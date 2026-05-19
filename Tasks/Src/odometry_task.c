@@ -61,6 +61,8 @@ void StartOdometryTask(void *argument) {
 
         if (osMutexAcquire(robot_pose_mutex, 2) == osOK) {
             ComputePose(&robot_pose, left_ticks_diff, right_ticks_diff);
+            printf("x:%d, y:%d, t:%d\r\n", (int)(robot_pose.x * 1000),
+                   (int)(robot_pose.y * 1000), (int)(robot_pose.theta * 1000));
             osMutexRelease(robot_pose_mutex);
         }
 

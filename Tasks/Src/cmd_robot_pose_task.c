@@ -1,7 +1,14 @@
 #include "cmd_robot_pose_task.h"
 
+#include "main.h"
+
 static Twist2D robot_cmd_vel;
 osMutexId_t robot_cmd_vel_mutex;
+
+static Pose2D target;
+osMutexId_t pose_target_mutex;
+
+static Pose2D prev_target;
 
 float ComputeRobotSpeedFromDistance(float distance) {
     return ROBOT_MIN_SPEED +
@@ -25,12 +32,7 @@ void StartCmdRobotPoseTask(void* argument) {
     CmdRobotPoseTaskParams* params = (CmdRobotPoseTaskParams*)(argument);
 
     robot_cmd_vel_mutex = osMutexNew(NULL);
-
-    Pose2D target1 = (Pose2D){2.0f, 0.0f, 0.0f};
-    Pose2D target2 = (Pose2D){0.0f, 2.0f, 0.0f};
-
-    Pose2D targets[2] = {target1, target2};
-    int target_index = 0;
+    pose_target_mutex = osMutexNew(NULL);
 
     uint32_t ticks = osKernelGetTickCount();
     while (1) {
@@ -38,12 +40,23 @@ void StartCmdRobotPoseTask(void* argument) {
         osDelayUntil(ticks);
 
         Pose2D robot_pose = GetRobotPose();
+        float distance = 0.0f;
+        float angle = 0.0f;
 
-        float distance = ComputeL2Distance(robot_pose, targets[target_index]);
-        float angle = ComputeAngleToPath(robot_pose, targets[target_index]);
+        if (osMutexAcquire(pose_target_mutex, 10) == osOK) {
+            distance = ComputeL2Distance(robot_pose, target);
+            angle = ComputeAngleToPath(robot_pose, target);
+            osMutexRelease(pose_target_mutex);
+        }
 
         float v = ComputeRobotSpeedFromDistance(distance);
         float w = ComputeRobotAngularSpeedFromAngle(angle);
+
+        if (fabs(angle) > 0.05f) {
+            v = 0.0f;
+        } else {
+            prev_target = target;
+        }
 
         if (distance < 0.1) {
             w = 0.0f;
@@ -57,9 +70,20 @@ void StartCmdRobotPoseTask(void* argument) {
 
             if (fabsf(targets[target_index].theta - robot_pose.theta) <
                 ANGLE_THRESHOLD) {*/
-            target_index++;
-            if (target_index >= 2) target_index = 0;
-            //}
+
+            osThreadFlagsSet(*params->strategy_task, STRAT_BIT_POSITION);
+        }
+
+        if (GetDistanceCapteurUSAvDr() < 0.3f ||
+            GetDistanceCapteurUSAvGa() < 0.3f) {
+            v = 0.0f;
+            w = 0.0f;
+        }
+
+        if (HAL_GPIO_ReadPin(TIRETTE_GPIO_Port, TIRETTE_Pin) ==
+            GPIO_PIN_RESET) {
+            v = 0.0f;
+            w = 0.0f;
         }
 
         if (osMutexAcquire(robot_cmd_vel_mutex, 10) == osOK) {
@@ -77,4 +101,11 @@ Twist2D GetRobotCmdVel() {
     }
 
     return (Twist2D){0};
+}
+
+void SetPoseTarget(Pose2D i) {
+    if (osMutexAcquire(pose_target_mutex, 10) == osOK) {
+        target = i;
+        osMutexRelease(pose_target_mutex);
+    }
 }
